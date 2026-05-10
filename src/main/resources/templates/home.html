@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home - UniPlan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .event-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .event-card h3 { margin-top: 0; color: #333; }
+        .event-card .type { display: inline-block; padding: 0.25rem 0.5rem; background-color: #e9ecef; color: #495057; border-radius: 4px; font-size: 0.875rem; margin-bottom: 1rem; }
+        .event-card p { color: #666; margin-bottom: 1rem; }
+        .event-card a { display: inline-block; padding: 0.5rem 1rem; background-color: #0056b3; color: white; text-decoration: none; border-radius: 4px; }
+        .event-card a:hover { background-color: #004494; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1>UniPlan</h1>
+    <div>
+        <span th:text="${#authentication.name}">User</span>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Available Events</h2>
+    
+    <div class="events-grid">
+        <div th:each="event : ${events}" class="event-card">
+            <h3 th:text="${event.title}">Event Title</h3>
+            <span class="type" th:text="${event.type}">Event Type</span>
+            <p th:text="${event.description}">Event description goes here...</p>
+            <p><strong>Date:</strong> <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}"></span></p>
+            <p><strong>Spots left:</strong> <span th:text="${event.capacity != null ? (event.capacity.max - event.capacity.current) : 0}"></span></p>
+            <a th:href="@{/event/{id}(id=${event.id})}">View Details</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

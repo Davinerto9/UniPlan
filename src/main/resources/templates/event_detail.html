@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Event Detail - UniPlan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 800px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #333; }
+        .detail-group { margin-bottom: 1.5rem; }
+        .detail-group label { font-weight: bold; color: #555; }
+        .detail-group p { margin: 0.5rem 0 0 0; color: #333; }
+        .btn-register { display: inline-block; padding: 0.75rem 1.5rem; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 1rem; border: none; cursor: pointer; }
+        .btn-register:hover { background-color: #218838; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1><a href="/home" style="margin:0;">UniPlan</a></h1>
+    <div>
+        <span th:text="${#authentication.name}">User</span>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <h2 th:text="${event.title}">Event Title</h2>
+    
+    <div class="detail-group">
+        <label>Type</label>
+        <p th:text="${event.type}"></p>
+    </div>
+    <div class="detail-group">
+        <label>Description</label>
+        <p th:text="${event.description}"></p>
+    </div>
+    <div class="detail-group">
+        <label>Date & Time</label>
+        <p th:text="${event.schedule != null ? (event.schedule.date + ' ' + event.schedule.startTime + ' - ' + event.schedule.endTime) : 'TBD'}"></p>
+    </div>
+    <div class="detail-group">
+        <label>Location</label>
+        <p th:text="${event.location != null ? event.location.name : 'TBD'}"></p>
+    </div>
+    <div class="detail-group">
+        <label>Capacity</label>
+        <p th:text="${event.capacity != null ? event.capacity.current + ' / ' + event.capacity.max : 'N/A'}"></p>
+    </div>
+
+    <form th:action="@{/event/{id}/register(id=${event.id})}" method="post">
+        <button type="submit" class="btn-register">Register for Event</button>
+    </form>
+</div>
+
+</body>
+</html>

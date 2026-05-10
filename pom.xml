@@ -9,11 +9,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>edu.co.icesi</groupId>
-    <artifactId>eventsManager</artifactId>
+    <artifactId>uniPlan</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>EventManager</name>
-    <description>EventManager</description>
+    <name>UniPlan</name>
+    <description>UniPlan</description>
     <url/>
     <licenses>
         <license/>
