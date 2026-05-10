@@ -12,6 +12,7 @@ public class EventRegistration {
     private String eventId;
     private String userId;
     private String status;
+    private String createdAt;
     private Timestamps timestamps;
     private ValidationSnapshot validationSnapshot;
 

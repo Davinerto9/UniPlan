@@ -3,13 +3,16 @@ package edu.co.icesi.eventsmanager.document;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Document(collection = "Events")
 public class Event {
     @Id
     private String id;
+    private String eventCode;
     private String title;
     private String description;
     private String type;
@@ -44,6 +47,9 @@ public class Event {
     public static class TypeDetails {
         private List<String> materials;
         private Prerequisite prerequisite;
+        private List<String> rules;
+        private Integer teams;
+        private Map<String, Object> additionalProperties;
     }
 
     @Data

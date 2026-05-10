@@ -25,6 +25,14 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public void registerStudent(String studentCode, String email, String password) throws Exception {
+        if (email == null || email.isBlank()) {
+            throw new Exception("Email is required.");
+        }
+
+        if (password == null || password.length() < 6) {
+            throw new Exception("Password must have at least 6 characters.");
+        }
+
         // Validate student exists in institutional DB
         Optional<Student> studentOpt = studentRepository.findById(studentCode);
         if (studentOpt.isEmpty()) {
@@ -36,9 +44,17 @@ public class AuthService {
             throw new Exception("Email does not match institutional records.");
         }
 
+        if (student.getEmail() == null || student.getEmail().isBlank()) {
+            throw new Exception("Student institutional record is not active.");
+        }
+
         // Validate not previously registered
         if (userRepository.findByInstitutionRefId(studentCode).isPresent()) {
             throw new Exception("Student is already registered.");
+        }
+
+        if (userRepository.findByAuthEmail(email).isPresent()) {
+            throw new Exception("Email is already in use.");
         }
 
         // Create User
