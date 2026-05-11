@@ -23,7 +23,7 @@ public class OrganizerController {
     private EventService eventService;
 
     @GetMapping("/organizer/dashboard")
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public String organizerDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("events", eventService.getEventsByOrganizer(userDetails.getUser().getId()));
         return "organizer_dashboard";

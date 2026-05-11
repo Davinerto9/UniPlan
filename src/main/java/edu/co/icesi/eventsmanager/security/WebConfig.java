@@ -37,8 +37,8 @@ public class WebConfig {
                                 "/register",
                                 "/error"
                         ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/events/new", "/event/*/edit", "/event/*/delete", "/register-organizer", "/organizer/**").hasAnyRole("ORGANIZER", "ADMIN")
+                        .requestMatchers("/admin/**", "/register-organizer").hasRole("ADMIN")
+                        .requestMatchers("/events/new", "/event/*/edit", "/event/*/delete", "/organizer/**").hasAnyRole("ORGANIZER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login

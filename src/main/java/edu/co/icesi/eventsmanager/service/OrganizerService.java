@@ -79,6 +79,42 @@ public class OrganizerService {
         return organizerRepository.save(organizer);
     }
 
+    public User registerUser(String email, String password, String role, String institutionType) throws Exception {
+        if (email == null || email.isBlank()) {
+            throw new Exception("Email is required.");
+        }
+        if (password == null || password.length() < 8) {
+            throw new Exception("Password must have at least 8 characters.");
+        }
+
+        if (userRepository.findByAuthEmail(email).isPresent()) {
+            throw new Exception("Email is already in use.");
+        }
+
+        User user = new User();
+        User.Auth auth = new User.Auth();
+        auth.setEmail(email);
+        auth.setPasswordHash(passwordEncoder.encode(password));
+        user.setAuth(auth);
+
+        User.InstitutionRef ref = new User.InstitutionRef();
+        ref.setId(null); // ID de PostgreSQL opcional para registro manual inicial
+        ref.setType(institutionType.toUpperCase());
+        user.setInstitutionRef(ref);
+
+        List<String> roles = new ArrayList<>();
+        roles.add(role.toUpperCase());
+        user.setRoles(roles);
+        user.setIsActive(true);
+        user.setCreatedAt(Instant.now().toString());
+
+        User.AppData appData = new User.AppData();
+        appData.setVolunteerHoursCompleted(0.0);
+        user.setAppData(appData);
+
+        return userRepository.save(user);
+    }
+
     public Optional<Organizer> findByUserId(String userId) {
         return organizerRepository.findByUserId(userId);
     }
