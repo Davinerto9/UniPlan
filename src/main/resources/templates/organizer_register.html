@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Organizer Registration - UniPlan</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 400px; }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #666; font-weight: bold; }
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 0.75rem; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        button:hover { background-color: #004494; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Register Organizer</h2>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <form action="/register-organizer" method="post">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password (min 8 chars)</label>
+            <input type="password" id="password" name="password" minlength="8" required>
+        </div>
+
+        <div class="form-group">
+            <label for="organizerType">Organizer Type *</label>
+            <select id="organizerType" name="organizerType" required>
+                <option value="">Select type</option>
+                <option value="PROFESSOR">Professor</option>
+                <option value="LEADER">Leader</option>
+                <option value="WELLBEING">Wellbeing</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="facultyCode">Faculty Code</label>
+            <input type="number" id="facultyCode" name="facultyCode" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="departmentCode">Department Code</label>
+            <input type="number" id="departmentCode" name="departmentCode" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="areaCode">Area Code</label>
+            <input type="text" id="areaCode" name="areaCode">
+        </div>
+
+        <button type="submit">Register Organizer</button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -49,7 +49,19 @@ public class EventService {
             event.setStatus("PUBLISHED");
         }
 
+        if (event.getType() != null) {
+            event.setType(event.getType().toUpperCase());
+        }
+
         return eventRepository.save(event);
+    }
+
+    public void deleteEvent(String eventId) {
+        eventRepository.deleteById(eventId);
+    }
+
+    public List<Event> getEventsByOrganizer(String organizerId) {
+        return eventRepository.findByOrganizerId(organizerId);
     }
 
     private void validateEvent(Event event) {

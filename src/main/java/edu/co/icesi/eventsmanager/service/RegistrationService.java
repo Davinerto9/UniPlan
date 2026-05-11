@@ -3,6 +3,7 @@ package edu.co.icesi.eventsmanager.service;
 import edu.co.icesi.eventsmanager.document.Event;
 import edu.co.icesi.eventsmanager.document.EventRegistration;
 import edu.co.icesi.eventsmanager.document.User;
+import edu.co.icesi.eventsmanager.repository.UserRepository;
 import edu.co.icesi.eventsmanager.service.AcademicValidationService;
 import edu.co.icesi.eventsmanager.service.StatisticsService;
 import edu.co.icesi.eventsmanager.repository.EventRegistrationRepository;
@@ -29,6 +30,9 @@ public class RegistrationService {
 
     @Autowired
     private StatisticsService statisticsService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(transactionManager = "mongoTransactionManager")
     public void registerToEvent(String eventId, User user) throws Exception {
@@ -115,7 +119,54 @@ public class RegistrationService {
         }
     }
 
+    public List<EventRegistration> getAllRegistrations() {
+        return registrationRepository.findAll();
+    }
+
+    public List<EventRegistration> getRegistrationsByEvent(String eventId) {
+        return registrationRepository.findByEventId(eventId);
+    }
+
+    @Transactional(transactionManager = "mongoTransactionManager")
+    public void markAttendance(String registrationId, String currentUserId) throws Exception {
+        EventRegistration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new Exception("Registration not found."));
+
+        Event event = eventRepository.findById(registration.getEventId())
+                .orElseThrow(() -> new Exception("Event not found."));
+
+        // Permitir si es Admin o si es el organizador del evento
+        User currentUser = userRepository.findById(currentUserId).orElse(null);
+        boolean isAdmin = currentUser != null && currentUser.getRoles() != null && 
+                          currentUser.getRoles().contains("ADMIN");
+
+        if (!isAdmin && !event.getOrganizerId().equals(currentUserId)) {
+            throw new Exception("Not authorized to manage attendance for this event.");
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(registration.getStatus())) {
+            throw new Exception("Registration is not in an active state.");
+        }
+
+        registration.setStatus("ATTENDED");
+        registrationRepository.save(registration);
+
+        // Gestión: Actualizar horas de voluntariado si el usuario existe
+        User student = userRepository.findById(registration.getUserId()).orElse(null);
+        if (student != null) {
+            if (student.getAppData() == null) student.setAppData(new User.AppData());
+            double currentHours = student.getAppData().getVolunteerHoursCompleted() != null ? student.getAppData().getVolunteerHoursCompleted() : 0.0;
+            student.getAppData().setVolunteerHoursCompleted(currentHours + 1.0); // Asumiendo 1 hora por evento
+            userRepository.save(student);
+        }
+    }
+
     private boolean hasScheduleConflict(Event currentEvent, String userId) {
+        if (currentEvent == null || currentEvent.getSchedule() == null) return false;
+        
+        LocalTime startA = LocalTime.parse(currentEvent.getSchedule().getStartTime());
+        LocalTime endA = LocalTime.parse(currentEvent.getSchedule().getEndTime());
+
         List<EventRegistration> registrations = registrationRepository.findByUserId(userId);
         for (EventRegistration registration : registrations) {
             if (!"ACTIVE".equalsIgnoreCase(registration.getStatus())) {
@@ -128,8 +179,6 @@ public class RegistrationService {
             if (!currentEvent.getSchedule().getDate().equals(otherEvent.getSchedule().getDate())) {
                 continue;
             }
-            LocalTime startA = LocalTime.parse(currentEvent.getSchedule().getStartTime());
-            LocalTime endA = LocalTime.parse(currentEvent.getSchedule().getEndTime());
             LocalTime startB = LocalTime.parse(otherEvent.getSchedule().getStartTime());
             LocalTime endB = LocalTime.parse(otherEvent.getSchedule().getEndTime());
             if (startA.isBefore(endB) && startB.isBefore(endA)) {

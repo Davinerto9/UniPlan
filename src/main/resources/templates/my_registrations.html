@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>My Registrations - UniPlan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f5f5f5; font-weight: bold; }
+        tr:hover { background-color: #f9f9f9; }
+        .btn-cancel { padding: 0.5rem 1rem; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-cancel:hover { background-color: #c82333; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
+        .empty-state { text-align: center; padding: 2rem; color: #666; }
+        .status { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; }
+        .status-active { background-color: #d4edda; color: #155724; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1><a href="/home" style="margin:0; color: white;">UniPlan</a></h1>
+    <div>
+        <span th:text="${#authentication.name}">User</span>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>My Event Registrations</h2>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div th:if="${registrations.isEmpty()}" class="empty-state">
+        <p>You have no event registrations yet.</p>
+        <a href="/home" style="color: #0056b3;">Browse events</a>
+    </div>
+
+    <div th:if="${not registrations.isEmpty()}">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event ID</th>
+                    <th>Status</th>
+                    <th>Enrolled At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="reg : ${registrations}">
+                    <td th:text="${reg.eventId}"></td>
+                    <td>
+                        <span class="status" th:classappend="${reg.status == 'ACTIVE' ? 'status-active' : 'status-cancelled'}" th:text="${reg.status}"></span>
+                    </td>
+                    <td th:text="${reg.timestamps?.enrolledAt}"></td>
+                    <td>
+                        <form th:action="@{/registrations/{id}/cancel(id=${reg.id})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn-cancel" th:disabled="${reg.status == 'CANCELLED'}">Cancel</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

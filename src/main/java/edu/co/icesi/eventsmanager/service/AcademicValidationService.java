@@ -23,6 +23,12 @@ public class AcademicValidationService {
         if (student.isEmpty()) {
             throw new Exception("Student not found in institutional database.");
         }
+        if (student.get().getIsActive() != null && !student.get().getIsActive()) {
+            throw new Exception("Student account is not active.");
+        }
+        if ("INACTIVE".equalsIgnoreCase(student.get().getAcademicStatus()) || "WITHDRAWN".equalsIgnoreCase(student.get().getAcademicStatus())) {
+            throw new Exception("Student academic status does not permit event registration.");
+        }
     }
 
     public boolean validatePrerequisite(String studentId, Event event) {

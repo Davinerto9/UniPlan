@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Event Detail - UniPlan</title>
     <style>
@@ -13,9 +13,14 @@
         .detail-group p { margin: 0.5rem 0 0 0; color: #333; }
         .btn-register { display: inline-block; padding: 0.75rem 1.5rem; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 1rem; border: none; cursor: pointer; }
         .btn-register:hover { background-color: #218838; }
+        .btn-edit { background-color: #ffc107; color: black; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; display: inline-block; }
+        .btn-edit:hover { background-color: #e0a800; }
+        .btn-delete { background-color: #dc3545; color: white; padding: 0.75rem 1.5rem; border-radius: 4px; border: none; cursor: pointer; }
+        .btn-delete:hover { background-color: #c82333; }
         .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
         .alert-success { background-color: #d4edda; color: #155724; }
         .alert-error { background-color: #f8d7da; color: #721c24; }
+        .btn-group { display: flex; gap: 1rem; margin-top: 2rem; }
     </style>
 </head>
 <body>
@@ -55,10 +60,22 @@
         <p th:text="${event.capacity != null ? event.capacity.current + ' / ' + event.capacity.max : 'N/A'}"></p>
     </div>
 
-    <form th:action="@{/event/{id}/register(id=${event.id})}" method="post">
-        <button type="submit" class="btn-register">Register for Event</button>
-    </form>
+    <div class="btn-group">
+        <sec:authorize access="hasRole('STUDENT')">
+            <form th:action="@{/event/{id}/register(id=${event.id})}" method="post" style="display: inline;">
+                <button type="submit" class="btn-register">Register for Event</button>
+            </form>
+        </sec:authorize>
+        <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
+            <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Edit Event</a>
+            <form th:action="@{/event/{id}/delete(id=${event.id})}" method="post" style="display: inline;">
+                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?');">Delete Event</button>
+            </form>
+        </sec:authorize>
+        <a href="/home" style="padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">Back to Events</a>
+    </div>
 </div>
 
 </body>
 </html>
+
