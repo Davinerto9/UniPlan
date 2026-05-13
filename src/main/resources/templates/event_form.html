@@ -10,17 +10,34 @@
         h2 { margin-top: 0; color: #333; }
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; font-weight: bold; color: #555; margin-bottom: 0.5rem; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; box-sizing: border-box; }
         .form-group textarea { resize: vertical; min-height: 100px; }
         .form-actions { margin-top: 2rem; display: flex; gap: 1rem; }
-        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; }
         .btn-primary { background-color: #0056b3; color: white; }
         .btn-primary:hover { background-color: #004494; }
         .btn-secondary { background-color: #6c757d; color: white; }
         .btn-secondary:hover { background-color: #5a6268; }
         .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
         .alert-error { background-color: #f8d7da; color: #721c24; }
+        .type-specific { display: none; background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 1rem; }
     </style>
+    <script>
+        function toggleTypeFields() {
+            var type = document.getElementById("type").value;
+            document.querySelectorAll(".type-specific").forEach(el => el.style.display = "none");
+            if (type === "TALLER") {
+                document.getElementById("workshopFields").style.display = "block";
+            } else if (type === "TORNEO") {
+                document.getElementById("tournamentFields").style.display = "block";
+            } else if (type === "VOLUNTARIADO") {
+                document.getElementById("volunteerFields").style.display = "block";
+            } else if (type === "CHARLA") {
+                document.getElementById("talkFields").style.display = "block";
+            }
+        }
+        window.onload = toggleTypeFields;
+    </script>
 </head>
 <body>
 
@@ -38,50 +55,95 @@
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
     <form th:action="@{/events/save}" method="post" th:object="${event}">
+        <input type="hidden" th:field="*{id}">
+        
         <div class="form-group">
             <label for="title">Title *</label>
-            <input type="text" id="title" name="title" th:field="*{title}" required>
+            <input type="text" id="title" th:field="*{title}" required>
         </div>
 
         <div class="form-group">
             <label for="description">Description *</label>
-            <textarea id="description" name="description" th:field="*{description}" required></textarea>
+            <textarea id="description" th:field="*{description}" required></textarea>
         </div>
 
         <div class="form-group">
             <label for="type">Event Type *</label>
-            <select id="type" name="type" th:field="*{type}" required>
+            <select id="type" th:field="*{type}" onchange="toggleTypeFields()" required>
                 <option value="">Select a type</option>
                 <option value="TALLER">Taller</option>
                 <option value="CHARLA">Charla</option>
                 <option value="TORNEO">Torneo</option>
+                <option value="VOLUNTARIADO">Voluntariado</option>
                 <option value="OTRO">Otro</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="date">Date *</label>
-            <input type="date" id="date" name="scheduleDate" th:field="*{schedule}" required>
+            <label>Schedule *</label>
+            <div style="display: flex; gap: 1rem;">
+                <input type="date" th:field="*{schedule.date}" placeholder="Date" required style="flex:2;">
+                <input type="time" th:field="*{schedule.startTime}" placeholder="Start" required style="flex:1;">
+                <input type="time" th:field="*{schedule.endTime}" placeholder="End" required style="flex:1;">
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="startTime">Start Time *</label>
-            <input type="time" id="startTime" name="startTime" required>
-        </div>
-
-        <div class="form-group">
-            <label for="endTime">End Time *</label>
-            <input type="time" id="endTime" name="endTime" required>
-        </div>
-
-        <div class="form-group">
-            <label for="location">Location Name *</label>
-            <input type="text" id="location" name="locationName" required>
+            <label for="locationName">Location Name *</label>
+            <input type="text" id="locationName" th:field="*{location.name}" required>
         </div>
 
         <div class="form-group">
             <label for="maxCapacity">Max Capacity *</label>
-            <input type="number" id="maxCapacity" name="maxCapacity" th:field="*{capacity}" min="1" required>
+            <input type="number" id="maxCapacity" th:field="*{capacity.max}" min="1" required>
+        </div>
+
+        <!-- Workshop Specific -->
+        <div id="workshopFields" class="type-specific">
+            <h3>Workshop Details</h3>
+            <div class="form-group">
+                <label>Prerequisite Subject Code</label>
+                <input type="text" th:field="*{typeDetails.prerequisite.subjectCode}" placeholder="e.g. MAT101">
+            </div>
+            <div class="form-group">
+                <label>Materials Required (comma separated)</label>
+                <input type="text" name="materialsInput" placeholder="Laptop, Notebook...">
+            </div>
+        </div>
+
+        <!-- Talk Specific -->
+        <div id="talkFields" class="type-specific">
+            <h3>Talk Details</h3>
+            <div class="form-group">
+                <label>Speaker Info</label>
+                <input type="text" name="speakerInfo" placeholder="Name, Profile...">
+            </div>
+        </div>
+
+        <!-- Tournament Specific -->
+        <div id="tournamentFields" class="type-specific">
+            <h3>Tournament Details</h3>
+            <div class="form-group">
+                <label>Type of Sport</label>
+                <input type="text" name="sportType">
+            </div>
+            <div class="form-group">
+                <label>Rules</label>
+                <textarea name="rulesInput"></textarea>
+            </div>
+        </div>
+
+        <!-- Volunteer Specific -->
+        <div id="volunteerFields" class="type-specific">
+            <h3>Volunteer Details</h3>
+            <div class="form-group">
+                <label>Cause / Community</label>
+                <input type="text" name="cause">
+            </div>
+            <div class="form-group">
+                <label>Required Hours</label>
+                <input type="number" name="requiredHours" step="0.5">
+            </div>
         </div>
 
         <div class="form-actions">

@@ -34,12 +34,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String processRegister(@RequestParam String studentCode,
+    public String processRegister(@RequestParam String institutionalCode,
                                   @RequestParam String email,
                                   @RequestParam String password,
+                                  @RequestParam String userType,
                                   RedirectAttributes redirectAttributes) {
         try {
-            authService.registerStudent(studentCode, email, password);
+            authService.registerUser(institutionalCode, email, password, userType);
             redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.");
             return "redirect:/login";
         } catch (Exception e) {

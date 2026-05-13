@@ -31,6 +31,6 @@ public class User {
 
     @Data
     public static class AppData {
-        private Double volunteerHoursCompleted;
+        private Double volunteerHoursCompleted = 0.0;
     }
 }

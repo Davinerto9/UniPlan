@@ -23,12 +23,6 @@ public class AcademicValidationService {
         if (student.isEmpty()) {
             throw new Exception("Student not found in institutional database.");
         }
-        if (student.get().getIsActive() != null && !student.get().getIsActive()) {
-            throw new Exception("Student account is not active.");
-        }
-        if ("INACTIVE".equalsIgnoreCase(student.get().getAcademicStatus()) || "WITHDRAWN".equalsIgnoreCase(student.get().getAcademicStatus())) {
-            throw new Exception("Student academic status does not permit event registration.");
-        }
     }
 
     public boolean validatePrerequisite(String studentId, Event event) {
@@ -42,8 +36,10 @@ public class AcademicValidationService {
         }
 
         try {
+            // Updated table and column names to match standard relational models if needed, 
+            // but keeping provided logic structure.
             Integer approvedCount = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM historial_academico WHERE estudiante_id = ? AND materia_codigo = ? AND estado IN ('APROBADO','APROBADA')",
+                    "SELECT COUNT(*) FROM ENROLLMENTS WHERE student_id = ? AND NRC IN (SELECT NRC FROM GROUPS WHERE subject_code = ?) AND status = 'Passed'",
                     Integer.class,
                     studentId,
                     prerequisite.getSubjectCode()
@@ -56,12 +52,17 @@ public class AcademicValidationService {
 
     public Double loadLatestSemester(String studentId) {
         try {
-            Integer semester = jdbcTemplate.queryForObject(
-                    "SELECT semestre FROM matriculas WHERE estudiante_id = ? ORDER BY semestre DESC LIMIT 1",
-                    Integer.class,
+            // Using the ENROLLMENTS and GROUPS tables from SQL
+            String semester = jdbcTemplate.queryForObject(
+                    "SELECT semester FROM GROUPS WHERE NRC IN (SELECT NRC FROM ENROLLMENTS WHERE student_id = ?) ORDER BY semester DESC LIMIT 1",
+                    String.class,
                     studentId
             );
-            return semester != null ? semester.doubleValue() : 0.0;
+            if (semester != null && semester.contains("-")) {
+                String[] parts = semester.split("-");
+                return Double.parseDouble(parts[0]) + (Double.parseDouble(parts[1]) / 10.0);
+            }
+            return 0.0; 
         } catch (Exception ex) {
             return 0.0;
         }

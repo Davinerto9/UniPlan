@@ -11,18 +11,28 @@ import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 @Configuration
+@EnableMongoRepositories(basePackages = "edu.co.icesi.eventsmanager.repository")
+@EnableJpaRepositories(basePackages = "edu.co.icesi.eventsmanager.repository")
 public class MongoAtlasConfig {
 
-    private static final String URI =
-            "mongodb+srv://giuseppe_db_user:123@cluster0.lfnesef.mongodb.net/UniPlan?retryWrites=true&w=majority&appName=Cluster0";
+    @org.springframework.beans.factory.annotation.Value("${spring.data.mongodb.uri}")
+    private String mongoUri;
 
     @Bean
     @Primary
     public MongoClient mongoClient() {
-        return MongoClients.create(new ConnectionString(URI));
+        com.mongodb.MongoClientSettings settings = com.mongodb.MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(mongoUri))
+                .applyToSocketSettings(builder -> 
+                    builder.connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                           .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS))
+                .build();
+        return MongoClients.create(settings);
     }
 
     @Bean

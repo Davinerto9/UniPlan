@@ -24,7 +24,10 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void registerStudent(String studentCode, String email, String password) throws Exception {
+    @Autowired
+    private edu.co.icesi.eventsmanager.repository.EmployeeRepository employeeRepository;
+
+    public void registerUser(String code, String email, String password, String userType) throws Exception {
         if (email == null || email.isBlank()) {
             throw new Exception("Email is required.");
         }
@@ -33,24 +36,24 @@ public class AuthService {
             throw new Exception("Password must have at least 6 characters.");
         }
 
-        // Validate student exists in institutional DB
-        Optional<Student> studentOpt = studentRepository.findById(studentCode);
-        if (studentOpt.isEmpty()) {
-            throw new Exception("Student not found in institutional database.");
+        if (userType == null || (!userType.equals("STUDENT") && !userType.equals("EMPLOYEE"))) {
+            throw new Exception("Invalid user type.");
         }
 
-        Student student = studentOpt.get();
-        if (!student.getEmail().equalsIgnoreCase(email)) {
-            throw new Exception("Email does not match institutional records.");
-        }
-
-        if (student.getEmail() == null || student.getEmail().isBlank()) {
-            throw new Exception("Student institutional record is not active.");
+        // Validate existence in institutional DB
+        if ("STUDENT".equals(userType)) {
+            Optional<Student> studentOpt = studentRepository.findById(code);
+            if (studentOpt.isEmpty()) throw new Exception("Student ID not found in institutional records.");
+            if (!studentOpt.get().getEmail().equalsIgnoreCase(email)) throw new Exception("Email does not match institutional records.");
+        } else {
+            Optional<edu.co.icesi.eventsmanager.entity.Employee> empOpt = employeeRepository.findById(code);
+            if (empOpt.isEmpty()) throw new Exception("Employee ID not found in institutional records.");
+            if (!empOpt.get().getEmail().equalsIgnoreCase(email)) throw new Exception("Email does not match institutional records.");
         }
 
         // Validate not previously registered
-        if (userRepository.findByInstitutionRefId(studentCode).isPresent()) {
-            throw new Exception("Student is already registered.");
+        if (userRepository.findByInstitutionRefId(code).isPresent()) {
+            throw new Exception("User with this ID is already registered.");
         }
 
         if (userRepository.findByAuthEmail(email).isPresent()) {
@@ -66,11 +69,11 @@ public class AuthService {
         user.setAuth(auth);
 
         User.InstitutionRef ref = new User.InstitutionRef();
-        ref.setId(studentCode);
-        ref.setType("STUDENT");
+        ref.setId(code);
+        ref.setType(userType);
         user.setInstitutionRef(ref);
 
-        user.setRoles(List.of("STUDENT"));
+        user.setRoles(List.of(userType));
         user.setIsActive(true);
         user.setCreatedAt(Instant.now().toString());
 

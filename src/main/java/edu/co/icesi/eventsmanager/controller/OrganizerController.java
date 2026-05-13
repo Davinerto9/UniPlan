@@ -37,15 +37,22 @@ public class OrganizerController {
 
     @PostMapping("/register-organizer")
     @PreAuthorize("hasRole('ADMIN')")
-    public String registerOrganizer(@RequestParam String email,
+    public String registerOrganizer(@RequestParam String institutionalCode,
+                                    @RequestParam String email,
                                     @RequestParam String password,
                                     @RequestParam String organizerType,
                                     @RequestParam(required = false) Double facultyCode,
                                     @RequestParam(required = false) Double departmentCode,
                                     @RequestParam(required = false) String areaCode,
+                                    @RequestParam(required = false) Integer academicProgramCode,
+                                    @RequestParam(required = false) Integer semester,
+                                    @RequestParam(required = false) String groupRepresented,
+                                    @RequestParam(required = false) String administrativeArea,
+                                    @RequestParam(required = false) String position,
                                     RedirectAttributes redirectAttributes) {
         try {
-            organizerService.registerOrganizer(email, password, organizerType, facultyCode, departmentCode, areaCode);
+            organizerService.registerOrganizer(institutionalCode, email, password, organizerType, facultyCode, departmentCode, areaCode,
+                    academicProgramCode, semester, groupRepresented, administrativeArea, position);
             redirectAttributes.addFlashAttribute("success", "Organizer account created successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

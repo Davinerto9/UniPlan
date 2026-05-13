@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Registrations - UniPlan Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .table th, .table td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        .table th { background-color: #f8f9fa; }
+        .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .status-enrolled { background-color: #cce5ff; color: #004085; }
+        .status-attended { background-color: #d4edda; color: #155724; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1><a href="/admin/dashboard" style="margin:0; color: white;">UniPlan Admin</a></h1>
+    <div>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>All Event Registrations</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Registration ID</th>
+                <th>Event ID</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="reg : ${registrations}">
+                <td th:text="${reg.id}">ID</td>
+                <td th:text="${reg.eventId}">Event ID</td>
+                <td th:text="${reg.userId}">User</td>
+                <td>
+                    <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Status</span>
+                </td>
+                <td th:text="${reg.createdAt}">Date</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(registrations)}">
+                <td colspan="5" style="text-align: center; color: #666;">No registrations found.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

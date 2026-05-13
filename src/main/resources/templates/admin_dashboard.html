@@ -32,29 +32,42 @@
 
     <div class="nav-buttons">
         <a href="/register-organizer" class="btn">Register Organizer</a>
-        <a href="/home" class="btn">View Events</a>
+        <a href="/admin/users/new" class="btn">Register New User</a>
+        <a href="/admin/registrations" class="btn">All Registrations</a>
+        <a href="/admin/registrations/export" class="btn btn-secondary">Export CSV</a>
     </div>
 
     <div class="dashboard-grid">
         <div class="card">
             <h3>Events</h3>
-            <div class="stat">-</div>
+            <div class="stat" th:text="${eventCount ?: '-'}">0</div>
             <p>Total events in system</p>
         </div>
         <div class="card">
             <h3>Users</h3>
-            <div class="stat">-</div>
+            <div class="stat" th:text="${userCount ?: '-'}">0</div>
             <p>Total registered users</p>
         </div>
         <div class="card">
             <h3>Registrations</h3>
-            <div class="stat">-</div>
+            <div class="stat" th:text="${regCount ?: '-'}">0</div>
             <p>Total event registrations</p>
         </div>
-        <div class="card">
-            <h3>Organizers</h3>
-            <div class="stat">-</div>
-            <p>Active organizers</p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <h3>System Reports</h3>
+        <div class="dashboard-grid">
+            <div class="card">
+                <h4>Event Popularity</h4>
+                <p>Top events by registration count.</p>
+                <a href="/admin/reports/popularity" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">View Report</a>
+            </div>
+            <div class="card">
+                <h4>Volunteer Hours</h4>
+                <p>Top students by volunteer hours.</p>
+                <a href="/admin/reports/volunteers" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">View Report</a>
+            </div>
         </div>
     </div>
 </div>

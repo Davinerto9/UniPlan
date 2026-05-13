@@ -1,43 +1,141 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Home - UniPlan</title>
+    <title>UniPlan - Events</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
-        .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        :root {
+            --primary: #0056b3;
+            --primary-dark: #004494;
+            --secondary: #6c757d;
+            --bg: #f4f7f6;
+            --white: #ffffff;
+            --text: #333;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); }
+        .navbar { background-color: var(--primary); padding: 1rem 2rem; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; }
+        .navbar h1 { margin: 0; font-size: 1.5rem; }
+        .navbar a { color: white; text-decoration: none; }
+        .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-links a { text-decoration: none; transition: opacity 0.2s; }
+        .nav-links a:hover { opacity: 0.8; }
         .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        .event-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .event-card h3 { margin-top: 0; color: #333; }
-        .event-card .type { display: inline-block; padding: 0.25rem 0.5rem; background-color: #e9ecef; color: #495057; border-radius: 4px; font-size: 0.875rem; margin-bottom: 1rem; }
-        .event-card p { color: #666; margin-bottom: 1rem; }
-        .event-card a { display: inline-block; padding: 0.5rem 1rem; background-color: #0056b3; color: white; text-decoration: none; border-radius: 4px; }
-        .event-card a:hover { background-color: #004494; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .filters { display: flex; gap: 1rem; background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow); flex-wrap: wrap; margin-bottom: 2rem; }
+        .filters form { display: flex; gap: 1rem; align-items: flex-end; width: 100%; flex-wrap: wrap; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .filter-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #555; font-size: 0.9rem; }
+        .filters select, .filters input { width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; }
+        .event-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+        .event-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .event-body { padding: 1.5rem; flex-grow: 1; }
+        .event-type { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; background: #e2e8f0; color: #4a5568; }
+        .type-taller { background: #e3f2fd; color: #1976d2; }
+        .type-charla { background: #fffde7; color: #fbc02d; }
+        .type-torneo { background: #e8f5e9; color: #388e3c; }
+        .type-voluntariado { background: #ffebee; color: #d32f2f; }
+        .event-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.75rem; color: #2d3748; }
+        .event-desc { font-size: 0.95rem; color: #718096; margin-bottom: 1.25rem; line-height: 1.6; }
+        .event-meta { font-size: 0.85rem; color: #a0aec0; display: flex; flex-direction: column; gap: 0.5rem; }
+        .event-meta span { display: flex; align-items: center; gap: 0.5rem; }
+        .event-footer { padding: 1.25rem 1.5rem; background: #f7fafc; border-top: 1px solid #edf2f7; }
+        .btn { padding: 0.7rem 1.4rem; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; font-size: 0.95rem; transition: all 0.2s; display: inline-block; text-align: center; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-dark); }
+        .btn-filter { background-color: var(--primary); color: white; min-width: 100px; }
+        .capacity-info { margin-top: 1.25rem; }
+        .capacity-bar { height: 8px; background: #edf2f7; border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem; }
+        .capacity-fill { height: 100%; background: #4299e1; border-radius: 4px; }
+        .capacity-text { font-size: 0.8rem; color: #718096; font-weight: 500; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <h1>UniPlan</h1>
-    <div>
-        <span th:text="${#authentication.name}">User</span>
-        <a href="/logout">Logout</a>
+    <h1><a href="/home">UniPlan</a></h1>
+    <div class="nav-links">
+        <a href="/my-registrations" sec:authorize="hasRole('STUDENT')">My Registrations</a>
+        <a href="/organizer/dashboard" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')">Organizer Dashboard</a>
+        <a href="/admin/dashboard" sec:authorize="hasRole('ADMIN')">Admin Panel</a>
+        <span sec:authentication="name" style="font-weight: 600; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 1.5rem;">User</span>
+        <a href="/logout" style="background: rgba(255,255,255,0.15); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem;">Logout</a>
     </div>
 </div>
 
 <div class="container">
-    <h2>Available Events</h2>
-    
-    <div class="events-grid">
+    <div class="header-actions">
+        <h2 style="font-size: 1.8rem; color: #1a202c; margin: 0;">Explore Events</h2>
+        <a href="/events/new" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')" class="btn btn-primary">+ Create Event</a>
+    </div>
+
+    <div class="filters">
+        <form action="/home" method="get">
+            <div class="filter-group">
+                <label>Event Type</label>
+                <select name="type">
+                    <option value="">All Types</option>
+                    <option value="TALLER">Taller</option>
+                    <option value="CHARLA">Charla</option>
+                    <option value="TORNEO">Torneo</option>
+                    <option value="VOLUNTARIADO">Voluntariado</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" name="startDate">
+            </div>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" name="endDate">
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select name="state">
+                    <option value="">All Status</option>
+                    <option value="UPCOMING">Upcoming</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="FINISHED">Finished</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="btn btn-filter">Filter</button>
+                <a href="/home" class="btn" style="background: #e2e8f0; color: #4a5568;">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="event-grid">
         <div th:each="event : ${events}" class="event-card">
-            <h3 th:text="${event.title}">Event Title</h3>
-            <span class="type" th:text="${event.type}">Event Type</span>
-            <p th:text="${event.description}">Event description goes here...</p>
-            <p><strong>Date:</strong> <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}"></span></p>
-            <p><strong>Spots left:</strong> <span th:text="${event.capacity != null ? (event.capacity.max - event.capacity.current) : 0}"></span></p>
-            <a th:href="@{/event/{id}(id=${event.id})}">View Details</a>
+            <div class="event-body">
+                <span th:class="'event-type type-' + ${#strings.toLowerCase(event.type)}" th:text="${event.type}">TYPE</span>
+                <div class="event-title" th:text="${event.title}">Event Title</div>
+                <div class="event-desc" th:text="${#strings.abbreviate(event.description, 140)}">Description</div>
+                <div class="event-meta">
+                    <span>📅 <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}">Date</span></span>
+                    <span>⏰ <span th:text="${event.schedule != null ? event.schedule.startTime : '--:--'}">00:00</span> - <span th:text="${event.schedule != null ? event.schedule.endTime : '--:--'}">00:00</span></span>
+                    <span>📍 <span th:text="${event.location != null ? event.location.name : 'Location TBD'}">Location</span></span>
+                </div>
+                
+                <div class="capacity-info" th:if="${event.capacity != null}">
+                    <div class="capacity-bar">
+                        <div class="capacity-fill" th:style="'width: ' + (${event.capacity.current} * 100 / ${event.capacity.max}) + '%'"></div>
+                    </div>
+                    <div class="capacity-text">
+                        <span th:text="${#numbers.formatInteger(event.capacity.max - event.capacity.current, 0)}">0</span> spots available of <span th:text="${#numbers.formatInteger(event.capacity.max, 0)}">100</span>
+                    </div>
+                </div>
+            </div>
+            <div class="event-footer">
+                <a th:href="@{/event/{id}(id=${event.id})}" class="btn btn-primary" style="width: 100%;">View Event Details</a>
+            </div>
         </div>
+    </div>
+    
+    <div th:if="${#lists.isEmpty(events)}" style="text-align: center; margin: 5rem 0; color: #a0aec0;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+        <p style="font-size: 1.2rem;">No events found matching your search.</p>
+        <a href="/home" style="color: var(--primary); text-decoration: none; font-weight: 600;">Clear all filters</a>
     </div>
 </div>
 

@@ -4,8 +4,6 @@ import edu.co.icesi.eventsmanager.document.Event;
 import edu.co.icesi.eventsmanager.document.EventRegistration;
 import edu.co.icesi.eventsmanager.document.User;
 import edu.co.icesi.eventsmanager.repository.UserRepository;
-import edu.co.icesi.eventsmanager.service.AcademicValidationService;
-import edu.co.icesi.eventsmanager.service.StatisticsService;
 import edu.co.icesi.eventsmanager.repository.EventRegistrationRepository;
 import edu.co.icesi.eventsmanager.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +38,10 @@ public class RegistrationService {
             throw new Exception("Authenticated user is required.");
         }
 
-        academicValidationService.ensureStudentIsActive(user.getInstitutionRef().getId());
-
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new Exception("Event not found."));
 
+        // General validations
         if (event.getCapacity() == null || event.getCapacity().getCurrent() == null || event.getCapacity().getMax() == null) {
             throw new Exception("Event capacity configuration is invalid.");
         }
@@ -57,13 +54,47 @@ public class RegistrationService {
             throw new Exception("You are already registered for this event.");
         }
 
-        if (hasScheduleConflict(event, user.getId())) {
-            throw new Exception("You have a schedule conflict with another active event.");
+        // Specific Validations by Type
+        String type = event.getType() != null ? event.getType().toUpperCase() : "";
+        boolean prerequisiteMet = true;
+        Double latestSemester = 0.0;
+
+        if (user.getInstitutionRef() != null && "STUDENT".equals(user.getInstitutionRef().getType())) {
+            String studentId = user.getInstitutionRef().getId();
+            academicValidationService.ensureStudentIsActive(studentId);
+            latestSemester = academicValidationService.loadLatestSemester(studentId);
+
+            if ("TALLERES".equals(type) || "TALLER".equals(type)) {
+                prerequisiteMet = academicValidationService.validatePrerequisite(studentId, event);
+                if (!prerequisiteMet) {
+                    throw new Exception("Academic prerequisite not met for this workshop.");
+                }
+            } else if ("TORNEOS DEPORTIVOS".equals(type) || "TORNEO".equals(type)) {
+                if (hasOverlapInSameType(event, user.getId())) {
+                    throw new Exception("You have a schedule overlap with another sports tournament.");
+                }
+            } else if ("ACTIVIDADES DE VOLUNTARIADO".equals(type) || "VOLUNTARIADO".equals(type)) {
+                Double minRequiredHours = 0.0; // Prerequisite hours to be able to join
+                if (event.getTypeDetails() != null && event.getTypeDetails().getAdditionalProperties() != null) {
+                    Object minHours = event.getTypeDetails().getAdditionalProperties().get("requiredHours");
+                    if (minHours != null) {
+                        try {
+                            minRequiredHours = Double.parseDouble(minHours.toString());
+                        } catch (NumberFormatException e) {
+                            minRequiredHours = 0.0;
+                        }
+                    }
+                }
+                
+                Double completedHours = user.getAppData() != null ? user.getAppData().getVolunteerHoursCompleted() : 0.0;
+                if (completedHours < minRequiredHours) {
+                    throw new Exception("Minimum volunteer hours (" + minRequiredHours + ") not met. You have " + completedHours + ".");
+                }
+            }
         }
 
-        boolean prerequisiteMet = academicValidationService.validatePrerequisite(user.getInstitutionRef().getId(), event);
-        if (!prerequisiteMet) {
-            throw new Exception("Academic prerequisite not met for this event.");
+        if (hasScheduleConflict(event, user.getId())) {
+            throw new Exception("You have a schedule conflict with another active event.");
         }
 
         EventRegistration registration = new EventRegistration();
@@ -79,7 +110,7 @@ public class RegistrationService {
         EventRegistration.ValidationSnapshot snapshot = new EventRegistration.ValidationSnapshot();
         snapshot.setVolunteerHoursAtEnrollment(user.getAppData() != null ? user.getAppData().getVolunteerHoursCompleted() : 0.0);
         snapshot.setPrerequisiteMet(prerequisiteMet);
-        snapshot.setSemesterAtEnrollment(academicValidationService.loadLatestSemester(user.getInstitutionRef().getId()));
+        snapshot.setSemesterAtEnrollment(latestSemester);
         registration.setValidationSnapshot(snapshot);
 
         registrationRepository.save(registration);
@@ -88,6 +119,30 @@ public class RegistrationService {
         eventRepository.save(event);
 
         statisticsService.refreshEventStatistics(event);
+    }
+
+    private boolean hasOverlapInSameType(Event currentEvent, String userId) {
+        List<EventRegistration> registrations = registrationRepository.findByUserId(userId);
+        for (EventRegistration reg : registrations) {
+            if (!"ACTIVE".equals(reg.getStatus())) continue;
+            Event other = eventRepository.findById(reg.getEventId()).orElse(null);
+            if (other != null && other.getType().equalsIgnoreCase(currentEvent.getType())) {
+                if (isOverlapping(currentEvent, other)) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isOverlapping(Event e1, Event e2) {
+        if (e1.getSchedule() == null || e2.getSchedule() == null) return false;
+        if (!e1.getSchedule().getDate().equals(e2.getSchedule().getDate())) return false;
+        
+        LocalTime s1 = LocalTime.parse(e1.getSchedule().getStartTime());
+        LocalTime f1 = LocalTime.parse(e1.getSchedule().getEndTime());
+        LocalTime s2 = LocalTime.parse(e2.getSchedule().getStartTime());
+        LocalTime f2 = LocalTime.parse(e2.getSchedule().getEndTime());
+        
+        return s1.isBefore(f2) && s2.isBefore(f1);
     }
 
     @Transactional(transactionManager = "mongoTransactionManager")
@@ -128,19 +183,17 @@ public class RegistrationService {
     }
 
     @Transactional(transactionManager = "mongoTransactionManager")
-    public void markAttendance(String registrationId, String currentUserId) throws Exception {
+    public void markAttendance(String registrationId, String adminUserId) throws Exception {
         EventRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new Exception("Registration not found."));
 
         Event event = eventRepository.findById(registration.getEventId())
                 .orElseThrow(() -> new Exception("Event not found."));
 
-        // Permitir si es Admin o si es el organizador del evento
-        User currentUser = userRepository.findById(currentUserId).orElse(null);
-        boolean isAdmin = currentUser != null && currentUser.getRoles() != null && 
-                          currentUser.getRoles().contains("ADMIN");
+        User adminUser = userRepository.findById(adminUserId).orElse(null);
+        boolean isAdmin = adminUser != null && adminUser.getRoles() != null && adminUser.getRoles().contains("ADMIN");
 
-        if (!isAdmin && !event.getOrganizerId().equals(currentUserId)) {
+        if (!isAdmin && !event.getOrganizerId().equals(adminUserId)) {
             throw new Exception("Not authorized to manage attendance for this event.");
         }
 
@@ -151,14 +204,31 @@ public class RegistrationService {
         registration.setStatus("ATTENDED");
         registrationRepository.save(registration);
 
-        // Gestión: Actualizar horas de voluntariado si el usuario existe
-        User student = userRepository.findById(registration.getUserId()).orElse(null);
-        if (student != null) {
-            if (student.getAppData() == null) student.setAppData(new User.AppData());
-            double currentHours = student.getAppData().getVolunteerHoursCompleted() != null ? student.getAppData().getVolunteerHoursCompleted() : 0.0;
-            student.getAppData().setVolunteerHoursCompleted(currentHours + 1.0); // Asumiendo 1 hora por evento
-            userRepository.save(student);
+        // Update volunteer hours if it's a volunteer activity
+        if ("ACTIVIDADES DE VOLUNTARIADO".equalsIgnoreCase(event.getType()) || "VOLUNTARIADO".equalsIgnoreCase(event.getType())) {
+            User student = userRepository.findById(registration.getUserId()).orElse(null);
+            if (student != null) {
+                if (student.getAppData() == null) student.setAppData(new User.AppData());
+                Double currentHours = student.getAppData().getVolunteerHoursCompleted() != null ? student.getAppData().getVolunteerHoursCompleted() : 0.0;
+                
+                Double hoursToAdd = 1.0; // Default
+                if (event.getTypeDetails() != null && event.getTypeDetails().getAdditionalProperties() != null) {
+                    Object hours = event.getTypeDetails().getAdditionalProperties().get("requiredHours");
+                    if (hours != null) {
+                        try {
+                            hoursToAdd = Double.parseDouble(hours.toString());
+                        } catch (NumberFormatException e) {
+                            // keep default
+                        }
+                    }
+                }
+                
+                student.getAppData().setVolunteerHoursCompleted(currentHours + hoursToAdd);
+                userRepository.save(student);
+            }
         }
+        
+        statisticsService.refreshEventStatistics(event);
     }
 
     private boolean hasScheduleConflict(Event currentEvent, String userId) {

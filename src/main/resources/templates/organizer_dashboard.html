@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Organizer Dashboard - UniPlan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .btn { padding: 0.75rem 1.5rem; background-color: #0056b3; color: white; text-decoration: none; border-radius: 4px; display: inline-block; border: none; cursor: pointer; }
+        .btn:hover { background-color: #004494; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .events-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .events-table th, .events-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        .events-table th { background-color: #f8f9fa; font-weight: bold; color: #333; }
+        .events-table tr:last-child td { border-bottom: none; }
+        .actions { display: flex; gap: 0.5rem; }
+        .alert { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1><a href="/home" style="margin:0; color: white;">UniPlan Organizer</a></h1>
+    <div>
+        <span th:text="${#authentication.name}">User</span>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="dashboard-header">
+        <h2>My Managed Events</h2>
+        <a href="/events/new" class="btn">Create New Event</a>
+    </div>
+
+    <table class="events-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="event : ${events}">
+                <td th:text="${event.title}">Event Title</td>
+                <td th:text="${event.type}">Type</td>
+                <td th:text="${event.schedule != null ? event.schedule.date : 'TBD'}">Date</td>
+                <td th:text="${event.capacity != null ? (event.capacity.current + ' / ' + event.capacity.max) : 'TBD'}">Capacity</td>
+                <td th:text="${event.status}">Status</td>
+                <td class="actions">
+                    <a th:href="@{/event/{id}(id=${event.id})}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">View</a>
+                    <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Edit</a>
+                    <a th:href="@{/event/{id}/registrations(id=${event.id})}" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Registrations</a>
+                    <form th:action="@{/event/{id}/delete(id=${event.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background-color: #dc3545;" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(events)}">
+                <td colspan="6" style="text-align: center; color: #666;">You haven't created any events yet.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

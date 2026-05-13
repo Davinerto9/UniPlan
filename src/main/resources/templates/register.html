@@ -2,14 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Register - UniPlan</title>
-    <link rel="stylesheet" href="/styles.css">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .register-container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
+        .register-container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; }
         h2 { text-align: center; color: #333; }
         .form-group { margin-bottom: 1rem; }
         label { display: block; margin-bottom: .5rem; color: #666; }
-        input[type="text"], input[type="password"], input[type="email"] { width: 100%; padding: .5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input, select { width: 100%; padding: .5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         button { width: 100%; padding: .75rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
         button:hover { background-color: #218838; }
         .login-link { text-align: center; margin-top: 1rem; }
@@ -21,22 +20,29 @@
 <body>
 
 <div class="register-container">
-    <h2>Student Registration</h2>
+    <h2>User Registration</h2>
 
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
     <form th:action="@{/register}" method="post">
         <div class="form-group">
-            <label for="studentCode">Student Code</label>
-            <input type="text" id="studentCode" name="studentCode" required>
+            <label for="userType">Registering as</label>
+            <select id="userType" name="userType" required>
+                <option value="STUDENT">Student</option>
+                <option value="EMPLOYEE">Employee</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="institutionalCode">Institutional Code (ID)</label>
+            <input type="text" id="institutionalCode" name="institutionalCode" placeholder="e.g. 2021001" required>
         </div>
         <div class="form-group">
             <label for="email">Institutional Email</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email" placeholder="example@icesi.edu.co" required>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" minlength="6" required>
         </div>
         <button type="submit">Register</button>
     </form>

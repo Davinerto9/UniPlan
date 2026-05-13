@@ -30,18 +30,25 @@ public class StatisticsService {
         statistic.setEventType(event.getType());
 
         List<EventRegistration> activeRegistrations = registrationRepository.findByEventIdAndStatus(event.getId(), "ACTIVE");
+        List<EventRegistration> attendedRegistrations = registrationRepository.findByEventIdAndStatus(event.getId(), "ATTENDED");
         List<EventRegistration> cancelRegistrations = registrationRepository.findByEventIdAndStatus(event.getId(), "CANCELLED");
 
-        statistic.setTotalRegistrations(activeRegistrations.size() + cancelRegistrations.size());
+        int currentEnrolled = activeRegistrations.size() + attendedRegistrations.size();
+        
+        statistic.setTotalRegistrations(currentEnrolled + cancelRegistrations.size());
         statistic.setTotalCancellations(cancelRegistrations.size());
-        statistic.setActualAttendees(activeRegistrations.size());
+        statistic.setActualAttendees(attendedRegistrations.size());
 
         if (event.getCapacity() != null && event.getCapacity().getMax() != null && event.getCapacity().getMax() > 0) {
-            statistic.setOccupancyPercentage(activeRegistrations.size() * 100.0 / event.getCapacity().getMax());
+            statistic.setOccupancyPercentage(currentEnrolled * 100.0 / event.getCapacity().getMax());
         } else {
             statistic.setOccupancyPercentage(0.0);
         }
 
         statisticRepository.save(statistic);
+    }
+
+    public List<EventStatistic> getAllStatistics() {
+        return statisticRepository.findAll();
     }
 }

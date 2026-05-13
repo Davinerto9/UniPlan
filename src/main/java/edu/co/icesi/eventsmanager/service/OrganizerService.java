@@ -1,7 +1,7 @@
 package edu.co.icesi.eventsmanager.service;
 
-import edu.co.icesi.eventsmanager.document.Organizer;
 import edu.co.icesi.eventsmanager.document.User;
+import edu.co.icesi.eventsmanager.document.Organizer;
 import edu.co.icesi.eventsmanager.repository.OrganizerRepository;
 import edu.co.icesi.eventsmanager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +25,21 @@ public class OrganizerService {
     private OrganizerRepository organizerRepository;
 
     @Autowired
+    private edu.co.icesi.eventsmanager.repository.EmployeeRepository employeeRepository;
+
+    @Autowired
+    private edu.co.icesi.eventsmanager.repository.StudentRepository studentRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Organizer registerOrganizer(String email, String password, String organizerType,
-                                       Double facultyCode, Double departmentCode, String areaCode) throws Exception {
+    public Organizer registerOrganizer(String code, String email, String password, String organizerType,
+                                       Double facultyCode, Double departmentCode, String areaCode,
+                                       Integer academicProgramCode, Integer semester, String groupRepresented,
+                                       String administrativeArea, String position) throws Exception {
+        if (code == null || code.isBlank()) {
+            throw new Exception("Institutional code is required.");
+        }
         if (email == null || email.isBlank()) {
             throw new Exception("Email is required.");
         }
@@ -39,6 +50,21 @@ public class OrganizerService {
             throw new Exception("Organizer type must be one of: PROFESSOR, LEADER, WELLBEING.");
         }
 
+        // Validate existence in institutional DB
+        if ("PROFESSOR".equals(organizerType.toUpperCase())) {
+            edu.co.icesi.eventsmanager.entity.Employee emp = employeeRepository.findById(code)
+                    .orElseThrow(() -> new Exception("Professor ID not found in institutional records."));
+            if (!emp.getEmail().equalsIgnoreCase(email)) {
+                throw new Exception("Email does not match institutional records for this Professor.");
+            }
+        } else if ("LEADER".equals(organizerType.toUpperCase())) {
+            edu.co.icesi.eventsmanager.entity.Student student = studentRepository.findById(code)
+                    .orElseThrow(() -> new Exception("Student ID not found in institutional records."));
+            if (!student.getEmail().equalsIgnoreCase(email)) {
+                throw new Exception("Email does not match institutional records for this Student.");
+            }
+        }
+        
         if (userRepository.findByAuthEmail(email).isPresent()) {
             throw new Exception("Email is already in use.");
         }
@@ -50,7 +76,7 @@ public class OrganizerService {
         user.setAuth(auth);
 
         User.InstitutionRef ref = new User.InstitutionRef();
-        ref.setId(null);
+        ref.setId(code);
         ref.setType("ORGANIZER");
         user.setInstitutionRef(ref);
 
@@ -70,10 +96,21 @@ public class OrganizerService {
         Organizer organizer = new Organizer();
         organizer.setUserId(savedUser.getId());
         organizer.setOrganizerType(organizerType.toUpperCase());
+        
         Organizer.TypeDetails typeDetails = new Organizer.TypeDetails();
-        typeDetails.setFacultyCode(facultyCode);
-        typeDetails.setDepartmentCode(departmentCode);
-        typeDetails.setAreaCode(areaCode);
+        // Only save what is NOT in institutional DB
+        if ("PROFESSOR".equals(organizerType.toUpperCase())) {
+            // facultyCode and departmentCode are often in Employee table, but areaCode might be specific
+            typeDetails.setAreaCode(areaCode);
+        } else if ("LEADER".equals(organizerType.toUpperCase())) {
+            // program is in Student/Academic tables, but groupRepresented and semester are specific/transient
+            typeDetails.setSemester(semester);
+            typeDetails.setGroupRepresented(groupRepresented);
+        } else if ("WELLBEING".equals(organizerType.toUpperCase())) {
+            typeDetails.setAdministrativeArea(administrativeArea);
+            typeDetails.setPosition(position);
+        }
+        
         organizer.setTypeDetails(typeDetails);
         organizer.setIsActive(true);
         return organizerRepository.save(organizer);
@@ -98,7 +135,7 @@ public class OrganizerService {
         user.setAuth(auth);
 
         User.InstitutionRef ref = new User.InstitutionRef();
-        ref.setId(null); // ID de PostgreSQL opcional para registro manual inicial
+        ref.setId(null);
         ref.setType(institutionType.toUpperCase());
         user.setInstitutionRef(ref);
 
