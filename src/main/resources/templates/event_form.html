@@ -80,6 +80,15 @@
         </div>
 
         <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" th:field="*{status}">
+                <option value="PUBLISHED">Published</option>
+                <option value="CANCELLED">Cancelled</option>
+                <option value="DRAFT">Draft</option>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label>Schedule *</label>
             <div style="display: flex; gap: 1rem;">
                 <input type="date" th:field="*{schedule.date}" placeholder="Date" required style="flex:2;">

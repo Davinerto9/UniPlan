@@ -54,9 +54,10 @@ public class OrganizerController {
             organizerService.registerOrganizer(institutionalCode, email, password, organizerType, facultyCode, departmentCode, areaCode,
                     academicProgramCode, semester, groupRepresented, administrativeArea, position);
             redirectAttributes.addFlashAttribute("success", "Organizer account created successfully.");
+            return "redirect:/admin/dashboard";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/register-organizer";
         }
-        return "redirect:/register-organizer";
     }
 }
