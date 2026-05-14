@@ -55,7 +55,7 @@
         </thead>
         <tbody>
             <tr th:each="reg : ${registrations}">
-                <td th:text="${reg.userId}">User Email</td>
+                <td th:text="${userEmails.get(reg.userId) != null ? userEmails.get(reg.userId) : reg.userId}">User Email</td>
                 <td>
                     <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Status</span>
                 </td>

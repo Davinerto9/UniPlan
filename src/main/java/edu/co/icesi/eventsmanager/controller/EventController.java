@@ -158,7 +158,21 @@ public class EventController {
     @GetMapping("/event/{id}/registrations")
     @PreAuthorize("hasAnyRole('ORGANIZER','ADMIN')")
     public String listRegistrations(@PathVariable String id, Model model) {
-        model.addAttribute("registrations", registrationService.getRegistrationsByEvent(id));
+        List<EventRegistration> registrations = registrationService.getRegistrationsByEvent(id);
+        
+        Map<String, String> userEmails = new java.util.HashMap<>();
+        for (EventRegistration reg : registrations) {
+            if (!userEmails.containsKey(reg.getUserId())) {
+                userRepository.findById(reg.getUserId()).ifPresent(user -> {
+                    if (user.getAuth() != null) {
+                        userEmails.put(reg.getUserId(), user.getAuth().getEmail());
+                    }
+                });
+            }
+        }
+        
+        model.addAttribute("registrations", registrations);
+        model.addAttribute("userEmails", userEmails);
         model.addAttribute("eventId", id);
         return "event_registrations";
     }

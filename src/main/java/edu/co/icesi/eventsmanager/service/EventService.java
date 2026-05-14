@@ -18,6 +18,9 @@ public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private CounterService counterService;
+
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
@@ -32,6 +35,11 @@ public class EventService {
 
     public Event saveEvent(Event event) {
         validateEvent(event);
+
+        // Generar ID progresivo si no existe
+        if (event.getId() == null || event.getId().isBlank()) {
+            event.setId(String.valueOf(counterService.getNextEventId()));
+        }
 
         if (event.getCreatedAt() == null) {
             event.setCreatedAt(Instant.now().toString());
