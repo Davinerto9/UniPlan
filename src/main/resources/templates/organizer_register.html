@@ -38,7 +38,8 @@
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-    <form action="/register-organizer" method="post">
+    <form th:action="@{/register-organizer}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <div class="form-group">
             <label for="institutionalCode">Institutional Code *</label>
             <input type="text" id="institutionalCode" name="institutionalCode" placeholder="e.g. 2024001" required>

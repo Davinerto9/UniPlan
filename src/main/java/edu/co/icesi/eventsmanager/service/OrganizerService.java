@@ -65,33 +65,58 @@ public class OrganizerService {
             }
         }
         
-        if (userRepository.findByAuthEmail(email).isPresent()) {
-            throw new Exception("Email is already in use.");
+        Optional<User> existingUserOpt = userRepository.findByAuthEmail(email);
+        User savedUser;
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            if (existingUser.getInstitutionRef() == null || existingUser.getInstitutionRef().getId() == null
+                    || !existingUser.getInstitutionRef().getId().equals(code)) {
+                throw new Exception("Email is already in use by another institutional account.");
+            }
+
+            List<String> roles = existingUser.getRoles() != null ? new ArrayList<>(existingUser.getRoles()) : new ArrayList<>();
+            if (!roles.contains("ORGANIZER")) {
+                roles.add("ORGANIZER");
+            }
+            String organizerRole = "ORGANIZER_" + organizerType.toUpperCase();
+            if (!roles.contains(organizerRole)) {
+                roles.add(organizerRole);
+            }
+            existingUser.setRoles(roles);
+            existingUser.setIsActive(true);
+            savedUser = userRepository.save(existingUser);
+        } else {
+            User user = new User();
+            User.Auth auth = new User.Auth();
+            auth.setEmail(email);
+            auth.setPasswordHash(passwordEncoder.encode(password));
+            user.setAuth(auth);
+
+            User.InstitutionRef ref = new User.InstitutionRef();
+            ref.setId(code);
+            ref.setType("EMPLOYEE");
+            if ("LEADER".equals(organizerType.toUpperCase())) {
+                ref.setType("STUDENT");
+            }
+            user.setInstitutionRef(ref);
+
+            List<String> roles = new ArrayList<>();
+            roles.add("ORGANIZER");
+            roles.add("ORGANIZER_" + organizerType.toUpperCase());
+            user.setRoles(roles);
+            user.setIsActive(true);
+            user.setCreatedAt(Instant.now().toString());
+
+            User.AppData appData = new User.AppData();
+            appData.setVolunteerHoursCompleted(0.0);
+            user.setAppData(appData);
+
+            savedUser = userRepository.save(user);
         }
 
-        User user = new User();
-        User.Auth auth = new User.Auth();
-        auth.setEmail(email);
-        auth.setPasswordHash(passwordEncoder.encode(password));
-        user.setAuth(auth);
-
-        User.InstitutionRef ref = new User.InstitutionRef();
-        ref.setId(code);
-        ref.setType("ORGANIZER");
-        user.setInstitutionRef(ref);
-
-        List<String> roles = new ArrayList<>();
-        roles.add("ORGANIZER");
-        roles.add("ORGANIZER_" + organizerType.toUpperCase());
-        user.setRoles(roles);
-        user.setIsActive(true);
-        user.setCreatedAt(Instant.now().toString());
-
-        User.AppData appData = new User.AppData();
-        appData.setVolunteerHoursCompleted(0.0);
-        user.setAppData(appData);
-
-        User savedUser = userRepository.save(user);
+        if (organizerRepository.findByUserId(savedUser.getId()).isPresent()) {
+            throw new Exception("This user is already registered as an organizer.");
+        }
 
         Organizer organizer = new Organizer();
         organizer.setUserId(savedUser.getId());
