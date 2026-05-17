@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>All Registrations - UniPlan Admin</title>
+    <title>Todos los Registros - Admin UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -21,34 +21,34 @@
 <div class="navbar">
     <h1><a href="/admin/dashboard" style="margin:0; color: white;">UniPlan Admin</a></h1>
     <div>
-        <a href="/logout">Logout</a>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
-    <h2>All Event Registrations</h2>
+    <h2>Todos los Registros en Eventos</h2>
     <table class="table">
         <thead>
             <tr>
-                <th>Registration ID</th>
-                <th>Event ID</th>
-                <th>User</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th>ID del Registro</th>
+                <th>ID del Evento</th>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Fecha</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="reg : ${registrations}">
                 <td th:text="${reg.id}">ID</td>
-                <td th:text="${reg.eventId}">Event ID</td>
-                <td th:text="${reg.userId}">User</td>
+                <td th:text="${reg.eventId}">ID del Evento</td>
+                <td th:text="${reg.userId}">Usuario</td>
                 <td>
-                    <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Status</span>
+                    <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Estado</span>
                 </td>
-                <td th:text="${reg.createdAt}">Date</td>
+                <td th:text="${reg.createdAt}">Fecha</td>
             </tr>
             <tr th:if="${#lists.isEmpty(registrations)}">
-                <td colspan="5" style="text-align: center; color: #666;">No registrations found.</td>
+                <td colspan="5" style="text-align: center; color: #666;">Sin registros encontrados.</td>
             </tr>
         </tbody>
     </table>

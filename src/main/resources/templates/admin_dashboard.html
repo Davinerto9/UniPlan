@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Admin Dashboard - UniPlan</title>
+    <title>Panel de Admin - UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -22,51 +22,51 @@
 <div class="navbar">
     <h1><a href="/home" style="margin:0; color: white;">UniPlan Admin</a></h1>
     <div>
-        <span th:text="${#authentication.name}">User</span>
-        <a href="/logout">Logout</a>
+        <span th:text="${#authentication.name}">Usuario</span>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
-    <h2>Admin Dashboard</h2>
+    <h2>Panel de Administrador</h2>
 
     <div class="nav-buttons">
-        <a href="/register-organizer" class="btn">Register Organizer</a>
-        <a href="/admin/users/new" class="btn">Register New User</a>
-        <a href="/admin/registrations" class="btn">All Registrations</a>
-        <a href="/admin/registrations/export" class="btn btn-secondary">Export CSV</a>
+        <a href="/register-organizer" class="btn">Registrar Organizador</a>
+        <a href="/admin/users/new" class="btn">Registrar Nuevo Usuario</a>
+        <a href="/admin/registrations" class="btn">Todos los Registros</a>
+        <a href="/admin/registrations/export" class="btn btn-secondary">Exportar CSV</a>
     </div>
 
     <div class="dashboard-grid">
         <div class="card">
-            <h3>Events</h3>
+            <h3>Eventos</h3>
             <div class="stat" th:text="${eventCount ?: '-'}">0</div>
-            <p>Total events in system</p>
+            <p>Total de eventos en el sistema</p>
         </div>
         <div class="card">
-            <h3>Users</h3>
+            <h3>Usuarios</h3>
             <div class="stat" th:text="${userCount ?: '-'}">0</div>
-            <p>Total registered users</p>
+            <p>Total de usuarios registrados</p>
         </div>
         <div class="card">
-            <h3>Registrations</h3>
+            <h3>Registros</h3>
             <div class="stat" th:text="${regCount ?: '-'}">0</div>
-            <p>Total event registrations</p>
+            <p>Total de registros en eventos</p>
         </div>
     </div>
 
     <div style="margin-top: 2rem;">
-        <h3>System Reports</h3>
+        <h3>Reportes del Sistema</h3>
         <div class="dashboard-grid">
             <div class="card">
-                <h4>Event Popularity</h4>
-                <p>Top events by registration count.</p>
-                <a href="/admin/reports/popularity" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">View Report</a>
+                <h4>Popularidad de Eventos</h4>
+                <p>Eventos más populares por cantidad de registros.</p>
+                <a href="/admin/reports/popularity" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">Ver Reporte</a>
             </div>
             <div class="card">
-                <h4>Volunteer Hours</h4>
-                <p>Top students by volunteer hours.</p>
-                <a href="/admin/reports/volunteers" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">View Report</a>
+                <h4>Horas de Voluntariado</h4>
+                <p>Estudiantes con más horas de voluntariado.</p>
+                <a href="/admin/reports/volunteers" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">Ver Reporte</a>
             </div>
         </div>
     </div>

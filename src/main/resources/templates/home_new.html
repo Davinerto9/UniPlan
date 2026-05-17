@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Home - UniPlan</title>
+    <title>Inicio - UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -16,8 +16,8 @@
         .event-card h3 { margin-top: 0; color: #333; }
         .event-card .type { display: inline-block; padding: 0.25rem 0.5rem; background-color: #e9ecef; color: #495057; border-radius: 4px; font-size: 0.875rem; margin-bottom: 1rem; }
         .event-card p { color: #666; margin-bottom: 1rem; }
-        .event-card .card-actions { display: flex; gap: 0.5rem; }
-        .event-card a { flex: 1; padding: 0.5rem 1rem; background-color: #0056b3; color: white; text-decoration: none; border-radius: 4px; text-align: center; }
+        .event-card .card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+        .event-card a { padding: 0.5rem 1rem; background-color: #0056b3; color: white; text-decoration: none; border-radius: 4px; text-align: center; min-width: 120px; }
         .event-card a:hover { background-color: #004494; }
         .event-card a.btn-edit { background-color: #ffc107; color: black; }
         .event-card a.btn-edit:hover { background-color: #e0a800; }
@@ -29,41 +29,41 @@
 <div class="navbar">
     <h1>UniPlan</h1>
     <div class="user-menu">
-        <span th:text="${#authentication.name}">User</span>
+        <span th:text="${#authentication.name}">Usuario</span>
         <sec:authorize access="hasRole('STUDENT')">
-            <a href="/my-registrations">My Registrations</a>
+            <a href="/my-registrations">Mis Registros</a>
         </sec:authorize>
         <sec:authorize access="hasRole('ADMIN')">
             <a href="/admin/dashboard">Admin</a>
         </sec:authorize>
-        <a href="/logout">Logout</a>
+        <a href="/logout">Cerrar Sesi</a>
     </div>
 </div>
 
 <div class="container">
-    <h2>Available Events</h2>
+    <h2>Eventos Disponibles</h2>
 
     <div class="header-actions">
         <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
-            <a href="/events/new" class="btn">Create Event</a>
+            <a href="/events/new" class="btn">Crear Evento</a>
         </sec:authorize>
     </div>
     
     <div th:if="${events.isEmpty()}" class="empty-state">
-        <p>No events available at the moment.</p>
+        <p>No hay eventos disponibles en este momento.</p>
     </div>
 
     <div class="events-grid" th:if="${not events.isEmpty()}">
         <div th:each="event : ${events}" class="event-card">
-            <h3 th:text="${event.title}">Event Title</h3>
-            <span class="type" th:text="${event.type}">Event Type</span>
-            <p th:text="${event.description}">Event description goes here...</p>
-            <p><strong>Date:</strong> <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}"></span></p>
-            <p><strong>Spots left:</strong> <span th:text="${event.capacity != null ? (event.capacity.max - event.capacity.current) : 0}"></span></p>
+            <h3 th:text="${event.title}">Título del Evento</h3>
+            <span class="type" th:text="${event.type}">Tipo de Evento</span>
+            <p th:text="${event.description}">Descripción del evento...</p>
+            <p><strong>Fecha:</strong> <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}"></span></p>
+            <p><strong>Cupos disponibles:</strong> <span th:text="${event.capacity != null ? (event.capacity.max - event.capacity.current) : 0}"></span></p>
             <div class="card-actions">
-                <a th:href="@{/event/{id}(id=${event.id})}">View Details</a>
+                <a th:href="@{/event/{id}(id=${event.id})}">Ver Detalles</a>
                 <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
-                    <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Edit</a>
+                    <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Editar</a>
                 </sec:authorize>
             </div>
         </div>

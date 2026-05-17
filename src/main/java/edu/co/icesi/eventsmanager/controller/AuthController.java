@@ -22,9 +22,6 @@ public class AuthController {
         if (error != null) {
             model.addAttribute("error", "Invalid username or password.");
         }
-        if (logout != null) {
-            model.addAttribute("success", "You have been logged out.");
-        }
         return "login";
     }
 

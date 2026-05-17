@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Event Form - UniPlan</title>
+    <title>Formulario de Evento - UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -36,7 +36,41 @@
                 document.getElementById("talkFields").style.display = "block";
             }
         }
-        window.onload = toggleTypeFields;
+
+        function initializeTimeSelects() {
+            const startSelect = document.getElementById("startTimeSelect");
+            const endSelect = document.getElementById("endTimeSelect");
+
+            const times = [];
+
+            for (let hour = 7; hour <= 20; hour++) {
+                [0, 10, 20, 30, 40, 50].forEach(min => {
+                    const formattedHour = String(hour).padStart(2, '0');
+                    const formattedMin = String(min).padStart(2, '0');
+                    const time = `${formattedHour}:${formattedMin}`;
+
+                    times.push(time);
+                });
+            }
+
+            times.forEach(time => {
+                startSelect.innerHTML += `<option value="${time}">${time}</option>`;
+                endSelect.innerHTML += `<option value="${time}">${time}</option>`;
+            });
+
+            startSelect.addEventListener("change", () => {
+                document.getElementById("startTime").value = startSelect.value;
+            });
+
+            endSelect.addEventListener("change", () => {
+                document.getElementById("endTime").value = endSelect.value;
+            });
+        }
+
+        window.onload = () => {
+            toggleTypeFields();
+            initializeTimeSelects();
+        };
     </script>
 </head>
 <body>
@@ -44,13 +78,13 @@
 <div class="navbar">
     <h1><a href="/home" style="margin:0; color: white;">UniPlan</a></h1>
     <div>
-        <span th:text="${#authentication.name}">User</span>
-        <a href="/logout">Logout</a>
+        <span th:text="${#authentication.name}">Usuario</span>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
-    <h2 th:text="${event.id == null ? 'Create Event' : 'Edit Event'}">Event Form</h2>
+    <h2 th:text="${event.id == null ? 'Crear Evento' : 'Editar Evento'}">Formulario de Evento</h2>
 
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
@@ -58,19 +92,19 @@
         <input type="hidden" th:field="*{id}">
         
         <div class="form-group">
-            <label for="title">Title *</label>
+            <label for="title">Título *</label>
             <input type="text" id="title" th:field="*{title}" required>
         </div>
 
         <div class="form-group">
-            <label for="description">Description *</label>
+            <label for="description">Descripción *</label>
             <textarea id="description" th:field="*{description}" required></textarea>
         </div>
 
         <div class="form-group">
-            <label for="type">Event Type *</label>
+            <label for="type">Tipo de Evento *</label>
             <select id="type" th:field="*{type}" onchange="toggleTypeFields()" required>
-                <option value="">Select a type</option>
+                <option value="">Selecciona un tipo</option>
                 <option value="TALLER">Taller</option>
                 <option value="CHARLA">Charla</option>
                 <option value="TORNEO">Torneo</option>
@@ -80,84 +114,83 @@
         </div>
 
         <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" th:field="*{status}">
-                <option value="PUBLISHED">Published</option>
-                <option value="CANCELLED">Cancelled</option>
-                <option value="DRAFT">Draft</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Schedule *</label>
+            <label>Horario *</label>
             <div style="display: flex; gap: 1rem;">
-                <input type="date" th:field="*{schedule.date}" placeholder="Date" required style="flex:2;">
-                <input type="time" th:field="*{schedule.startTime}" placeholder="Start" required style="flex:1;">
-                <input type="time" th:field="*{schedule.endTime}" placeholder="End" required style="flex:1;">
+                <input type="date" th:field="*{schedule.date}" placeholder="Fecha" required style="flex:2;">
+                <select id="startTimeSelect" style="flex:1;">
+                    <option value="">Hora inicio</option>
+                </select>
+
+                <select id="endTimeSelect" style="flex:1;">
+                    <option value="">Hora fin</option>
+                </select>
+
+                <input type="hidden" id="startTime" th:field="*{schedule.startTime}">
+                <input type="hidden" id="endTime" th:field="*{schedule.endTime}">
             </div>
         </div>
 
         <div class="form-group">
-            <label for="locationName">Location Name *</label>
+            <label for="locationName">Ubicación *</label>
             <input type="text" id="locationName" th:field="*{location.name}" required>
         </div>
 
         <div class="form-group">
-            <label for="maxCapacity">Max Capacity *</label>
+            <label for="maxCapacity">Capacidad Máxima *</label>
             <input type="number" id="maxCapacity" th:field="*{capacity.max}" min="1" required>
         </div>
 
         <!-- Workshop Specific -->
         <div id="workshopFields" class="type-specific">
-            <h3>Workshop Details</h3>
+            <h3>Detalles del Taller</h3>
             <div class="form-group">
-                <label>Prerequisite Subject Code</label>
-                <input type="text" th:field="*{typeDetails.prerequisite.subjectCode}" placeholder="e.g. MAT101">
+                <label>Código de Materia Requisito</label>
+                <input type="text" th:field="*{typeDetails.prerequisite.subjectCode}" placeholder="ej. MAT101">
             </div>
             <div class="form-group">
-                <label>Materials Required (comma separated)</label>
-                <input type="text" name="materialsInput" placeholder="Laptop, Notebook...">
+                <label>Materiales Requeridos (separados por coma)</label>
+                <input type="text" name="materialsInput" placeholder="Laptop, Cuaderno...">
             </div>
         </div>
 
         <!-- Talk Specific -->
         <div id="talkFields" class="type-specific">
-            <h3>Talk Details</h3>
+            <h3>Detalles de la Charla</h3>
             <div class="form-group">
-                <label>Speaker Info</label>
-                <input type="text" name="speakerInfo" placeholder="Name, Profile...">
+                <label>Información del Conferencista</label>
+                <input type="text" name="speakerInfo" placeholder="Nombre, Perfil...">
             </div>
         </div>
 
         <!-- Tournament Specific -->
         <div id="tournamentFields" class="type-specific">
-            <h3>Tournament Details</h3>
+            <h3>Detalles del Torneo</h3>
             <div class="form-group">
-                <label>Type of Sport</label>
+                <label>Tipo de Deporte</label>
                 <input type="text" name="sportType">
             </div>
             <div class="form-group">
-                <label>Rules</label>
+                <label>Reglamento</label>
                 <textarea name="rulesInput"></textarea>
             </div>
         </div>
 
         <!-- Volunteer Specific -->
         <div id="volunteerFields" class="type-specific">
-            <h3>Volunteer Details</h3>
+            <h3>Detalles del Voluntariado</h3>
             <div class="form-group">
-                <label>Cause / Community</label>
+                <label>Causa / Comunidad</label>
                 <input type="text" name="cause">
             </div>
             <div class="form-group">
-                <label>Required Hours</label>
+                <label>Horas Requeridas</label>
                 <input type="number" name="requiredHours" step="0.5">
             </div>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save Event</button>
-            <a href="/home" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Guardar Evento</button>
+            <a href="/home" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>

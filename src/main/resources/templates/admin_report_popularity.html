@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Event Popularity Report - UniPlan Admin</title>
+    <title>Reporte de Popularidad de Eventos - Admin UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -17,33 +17,33 @@
 <div class="navbar">
     <h1><a href="/admin/dashboard" style="margin:0; color: white;">UniPlan Admin</a></h1>
     <div>
-        <a href="/logout">Logout</a>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
-    <h2>Event Popularity Report</h2>
-    <p>Statistics aggregated from the relational database.</p>
+    <h2>Reporte de Popularidad de Eventos</h2>
+    <p>Estadísticas agregadas desde la base de datos relacional.</p>
     <table class="table">
         <thead>
             <tr>
-                <th>Event Title</th>
-                <th>Type</th>
-                <th>Registrations</th>
-                <th>Attendees</th>
-                <th>Occupancy %</th>
+                <th>Título del Evento</th>
+                <th>Tipo</th>
+                <th>Registros</th>
+                <th>Asistentes</th>
+                <th>Ocupación %</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="stat : ${stats}">
-                <td th:text="${stat.eventTitle}">Title</td>
-                <td th:text="${stat.eventType}">Type</td>
+                <td th:text="${stat.eventTitle}">Título</td>
+                <td th:text="${stat.eventType}">Tipo</td>
                 <td th:text="${stat.totalRegistrations}">0</td>
                 <td th:text="${stat.actualAttendees}">0</td>
                 <td th:text="${#numbers.formatDecimal(stat.occupancyPercentage, 1, 2)} + '%'">0%</td>
             </tr>
             <tr th:if="${#lists.isEmpty(stats)}">
-                <td colspan="5" style="text-align: center; color: #666;">No data available.</td>
+                <td colspan="5" style="text-align: center; color: #666;">Sin datos disponibles.</td>
             </tr>
         </tbody>
     </table>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Top Volunteers Report - UniPlan Admin</title>
+    <title>Reporte de Voluntarios - Admin UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -17,29 +17,29 @@
 <div class="navbar">
     <h1><a href="/admin/dashboard" style="margin:0; color: white;">UniPlan Admin</a></h1>
     <div>
-        <a href="/logout">Logout</a>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
-    <h2>Top Volunteers Report</h2>
-    <p>Students with the most volunteer hours completed (MongoDB data).</p>
+    <h2>Reporte de Voluntarios Principales</h2>
+    <p>Estudiantes con más horas de voluntariado completadas (datos MongoDB).</p>
     <table class="table">
         <thead>
             <tr>
-                <th>User Email</th>
-                <th>Institutional ID</th>
-                <th>Hours Completed</th>
+                <th>Correo del Usuario</th>
+                <th>ID Institucional</th>
+                <th>Horas Completadas</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="user : ${users}">
-                <td th:text="${user.auth.email}">Email</td>
+                <td th:text="${user.auth.email}">Correo</td>
                 <td th:text="${user.institutionRef.id}">ID</td>
                 <td th:text="${user.appData.volunteerHoursCompleted}">0.0</td>
             </tr>
             <tr th:if="${#lists.isEmpty(users)}">
-                <td colspan="3" style="text-align: center; color: #666;">No data available.</td>
+                <td colspan="3" style="text-align: center; color: #666;">Sin datos disponibles.</td>
             </tr>
         </tbody>
     </table>

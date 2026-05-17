@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login - UniPlan</title>
+    <title>Iniciar Sesión - UniPlan</title>
     <link rel="stylesheet" href="/styles.css">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
@@ -22,30 +22,30 @@
 <body>
 
 <div class="login-container">
-    <h2>UniPlan Login</h2>
+    <h2>Iniciar Sesión UniPlan</h2>
 
     <div th:if="${param.error}" class="alert alert-error">
-        Invalid username or password.
+        Usuario o contraseña inválidos.
     </div>
     <div th:if="${param.logout}" class="alert alert-success">
-        You have been logged out.
+        Has cerrado sesión exitosamente.
     </div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
     <form th:action="@{/login}" method="post">
         <div class="form-group">
-            <label for="username">Email</label>
+            <label for="username">Correo</label>
             <input type="text" id="username" name="username" required>
         </div>
         <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Contraseña</label>
             <input type="password" id="password" name="password" required>
         </div>
-        <button type="submit">Log In</button>
+        <button type="submit">Iniciar Sesión</button>
     </form>
     
     <div class="register-link">
-        <p>Don't have an account? <a href="/register">Register here</a></p>
+        <p>¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
     </div>
 </div>
 

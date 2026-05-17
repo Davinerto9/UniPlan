@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Event Detail - UniPlan</title>
+    <title>Detalles del Evento - UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -28,8 +28,8 @@
 <div class="navbar">
     <h1><a href="/home" style="margin:0;">UniPlan</a></h1>
     <div>
-        <span th:text="${#authentication.name}">User</span>
-        <a href="/logout">Logout</a>
+        <span th:text="${#authentication.name}">Usuario</span>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -37,42 +37,42 @@
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-    <h2 th:text="${event.title}">Event Title</h2>
+    <h2 th:text="${event.title}">Título del Evento</h2>
     
     <div class="detail-group">
-        <label>Type</label>
+        <label>Tipo</label>
         <p th:text="${event.type}"></p>
     </div>
     <div class="detail-group">
-        <label>Description</label>
+        <label>Descripción</label>
         <p th:text="${event.description}"></p>
     </div>
     <div class="detail-group">
-        <label>Date & Time</label>
+        <label>Fecha y Hora</label>
         <p th:text="${event.schedule != null ? (event.schedule.date + ' ' + event.schedule.startTime + ' - ' + event.schedule.endTime) : 'TBD'}"></p>
     </div>
     <div class="detail-group">
-        <label>Location</label>
+        <label>Ubicación</label>
         <p th:text="${event.location != null ? event.location.name : 'TBD'}"></p>
     </div>
     <div class="detail-group">
-        <label>Capacity</label>
+        <label>Capacidad</label>
         <p th:text="${event.capacity != null ? event.capacity.current + ' / ' + event.capacity.max : 'N/A'}"></p>
     </div>
 
     <div class="btn-group">
         <sec:authorize access="hasRole('STUDENT')">
             <form th:action="@{/event/{id}/register(id=${event.id})}" method="post" style="display: inline;">
-                <button type="submit" class="btn-register">Register for Event</button>
+                <button type="submit" class="btn-register">Registrarse en el Evento</button>
             </form>
         </sec:authorize>
         <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
-            <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Edit Event</a>
+            <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Editar Evento</a>
             <form th:action="@{/event/{id}/delete(id=${event.id})}" method="post" style="display: inline;">
-                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?');">Delete Event</button>
+                <button type="submit" class="btn-delete" onclick="return confirm('Estás seguro?');">Eliminar Evento</button>
             </form>
         </sec:authorize>
-        <a href="/home" style="padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">Back to Events</a>
+        <a href="/home" style="padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">Volver a Eventos</a>
     </div>
 </div>
 

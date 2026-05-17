@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>UniPlan - Events</title>
+    <title>UniPlan - Eventos</title>
     <style>
         :root {
             --primary: #0056b3;
@@ -55,26 +55,26 @@
 <div class="navbar">
     <h1><a href="/home">UniPlan</a></h1>
     <div class="nav-links">
-        <a href="/my-registrations" sec:authorize="hasRole('STUDENT')">My Registrations</a>
-        <a href="/organizer/dashboard" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')">Organizer Dashboard</a>
-        <a href="/admin/dashboard" sec:authorize="hasRole('ADMIN')">Admin Panel</a>
-        <span sec:authentication="name" style="font-weight: 600; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 1.5rem;">User</span>
-        <a href="/logout" style="background: rgba(255,255,255,0.15); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem;">Logout</a>
+        <a href="/my-registrations" sec:authorize="hasRole('STUDENT')">Mis Registros</a>
+        <a href="/organizer/dashboard" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')">Panel del Organizador</a>
+        <a href="/admin/dashboard" sec:authorize="hasRole('ADMIN')">Panel Admin</a>
+        <span sec:authentication="name" style="font-weight: 600; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 1.5rem;">Usuario</span>
+        <a href="/logout" style="background: rgba(255,255,255,0.15); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem;">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
     <div class="header-actions">
-        <h2 style="font-size: 1.8rem; color: #1a202c; margin: 0;">Explore Events</h2>
-        <a href="/events/new" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')" class="btn btn-primary">+ Create Event</a>
+        <h2 style="font-size: 1.8rem; color: #1a202c; margin: 0;">Explorar Eventos</h2>
+        <a href="/events/new" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')" class="btn btn-primary">+ Crear Evento</a>
     </div>
 
     <div class="filters">
         <form action="/home" method="get">
             <div class="filter-group">
-                <label>Event Type</label>
+                <label>Tipo de Evento</label>
                 <select name="type">
-                    <option value="">All Types</option>
+                    <option value="">Todos los Tipos</option>
                     <option value="TALLER">Taller</option>
                     <option value="CHARLA">Charla</option>
                     <option value="TORNEO">Torneo</option>
@@ -82,25 +82,25 @@
                 </select>
             </div>
             <div class="filter-group">
-                <label>From Date</label>
+                <label>Desde</label>
                 <input type="date" name="startDate">
             </div>
             <div class="filter-group">
-                <label>To Date</label>
+                <label>Hasta</label>
                 <input type="date" name="endDate">
             </div>
             <div class="filter-group">
-                <label>Status</label>
+                <label>Estado</label>
                 <select name="state">
-                    <option value="">All Status</option>
-                    <option value="UPCOMING">Upcoming</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="FINISHED">Finished</option>
+                    <option value="">Todos los Estados</option>
+                    <option value="UPCOMING">Próximos</option>
+                    <option value="IN_PROGRESS">En Curso</option>
+                    <option value="FINISHED">Finalizados</option>
                 </select>
             </div>
             <div style="display: flex; gap: 0.5rem;">
-                <button type="submit" class="btn btn-filter">Filter</button>
-                <a href="/home" class="btn" style="background: #e2e8f0; color: #4a5568;">Reset</a>
+                <button type="submit" class="btn btn-filter">Filtrar</button>
+                <a href="/home" class="btn" style="background: #e2e8f0; color: #4a5568;">Limpiar</a>
             </div>
         </form>
     </div>
@@ -108,13 +108,13 @@
     <div class="event-grid">
         <div th:each="event : ${events}" class="event-card">
             <div class="event-body">
-                <span th:class="'event-type type-' + ${#strings.toLowerCase(event.type)}" th:text="${event.type}">TYPE</span>
-                <div class="event-title" th:text="${event.title}">Event Title</div>
-                <div class="event-desc" th:text="${#strings.abbreviate(event.description, 140)}">Description</div>
+                <span th:class="'event-type type-' + ${#strings.toLowerCase(event.type)}" th:text="${event.type}">TIPO</span>
+                <div class="event-title" th:text="${event.title}">Título del Evento</div>
+                <div class="event-desc" th:text="${#strings.abbreviate(event.description, 140)}">Descripción</div>
                 <div class="event-meta">
-                    <span>📅 <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}">Date</span></span>
+                    <span>📅 <span th:text="${event.schedule != null ? event.schedule.date : 'TBD'}">Fecha</span></span>
                     <span>⏰ <span th:text="${event.schedule != null ? event.schedule.startTime : '--:--'}">00:00</span> - <span th:text="${event.schedule != null ? event.schedule.endTime : '--:--'}">00:00</span></span>
-                    <span>📍 <span th:text="${event.location != null ? event.location.name : 'Location TBD'}">Location</span></span>
+                    <span>📍 <span th:text="${event.location != null ? event.location.name : 'Ubicación TBD'}">Ubicación</span></span>
                 </div>
                 
                 <div class="capacity-info" th:if="${event.capacity != null}">
@@ -122,20 +122,20 @@
                         <div class="capacity-fill" th:style="'width: ' + (${event.capacity.current} * 100 / ${event.capacity.max}) + '%'"></div>
                     </div>
                     <div class="capacity-text">
-                        <span th:text="${#numbers.formatInteger(event.capacity.max - event.capacity.current, 0)}">0</span> spots available of <span th:text="${#numbers.formatInteger(event.capacity.max, 0)}">100</span>
+                        <span th:text="${#numbers.formatInteger(event.capacity.max - event.capacity.current, 0)}">0</span> cupos disponibles de <span th:text="${#numbers.formatInteger(event.capacity.max, 0)}">100</span>
                     </div>
                 </div>
             </div>
             <div class="event-footer">
-                <a th:href="@{/event/{id}(id=${event.id})}" class="btn btn-primary" style="width: 100%;">View Event Details</a>
+                <a th:href="@{/event/{id}(id=${event.id})}" class="btn btn-primary">Ver Detalles del Evento</a>
             </div>
         </div>
     </div>
     
     <div th:if="${#lists.isEmpty(events)}" style="text-align: center; margin: 5rem 0; color: #a0aec0;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-        <p style="font-size: 1.2rem;">No events found matching your search.</p>
-        <a href="/home" style="color: var(--primary); text-decoration: none; font-weight: 600;">Clear all filters</a>
+        <p style="font-size: 1.2rem;">No se encontraron eventos que coincidan con tu búsqueda.</p>
+        <a href="/home" style="color: var(--primary); text-decoration: none; font-weight: 600;">Limpiar todos los filtros</a>
     </div>
 </div>
 

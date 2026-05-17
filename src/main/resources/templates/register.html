@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Register - UniPlan</title>
+    <title>Registro - UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .register-container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; }
@@ -20,35 +20,35 @@
 <body>
 
 <div class="register-container">
-    <h2>User Registration</h2>
+    <h2>Registro de Usuarios</h2>
 
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
     <form th:action="@{/register}" method="post">
         <div class="form-group">
-            <label for="userType">Registering as</label>
+            <label for="userType">Registrarse como</label>
             <select id="userType" name="userType" required>
-                <option value="STUDENT">Student</option>
-                <option value="EMPLOYEE">Employee</option>
+                <option value="STUDENT">Estudiante</option>
+                <option value="EMPLOYEE">Empleado</option>
             </select>
         </div>
         <div class="form-group">
-            <label for="institutionalCode">Institutional Code (ID)</label>
-            <input type="text" id="institutionalCode" name="institutionalCode" placeholder="e.g. 2021001" required>
+            <label for="institutionalCode">Código Institucional (ID)</label>
+            <input type="text" id="institutionalCode" name="institutionalCode" placeholder="ej. 2021001" required>
         </div>
         <div class="form-group">
-            <label for="email">Institutional Email</label>
-            <input type="email" id="email" name="email" placeholder="example@icesi.edu.co" required>
+            <label for="email">Correo Institucional</label>
+            <input type="email" id="email" name="email" placeholder="ejemplo@icesi.edu.co" required>
         </div>
         <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Contraseña</label>
             <input type="password" id="password" name="password" minlength="6" required>
         </div>
-        <button type="submit">Register</button>
+        <button type="submit">Registrarse</button>
     </form>
     
     <div class="login-link">
-        <p>Already registered? <a href="/login">Log in here</a></p>
+        <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a></p>
     </div>
 </div>
 

@@ -33,36 +33,38 @@
 </div>
 
 <div class="container">
-    <h2>My Event Registrations</h2>
+    <h2>Mis registros al evento</h2>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
     <div th:if="${registrations.isEmpty()}" class="empty-state">
-        <p>You have no event registrations yet.</p>
-        <a href="/home" style="color: #0056b3;">Browse events</a>
+        <p>No tienes registros en eventos aún.</p>
+        <a href="/home" style="color: #0056b3;">Explorar eventos</a>
     </div>
 
     <div th:if="${not registrations.isEmpty()}">
         <table>
             <thead>
                 <tr>
-                    <th>Event ID</th>
-                    <th>Status</th>
-                    <th>Enrolled At</th>
-                    <th>Actions</th>
+                    <th>Evento</th>
+                    <th>Estado</th>
+                    <th>Registrado el</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="reg : ${registrations}">
-                    <td th:text="${reg.eventId}"></td>
+                    <td>
+                        <span th:text="${eventTitles[reg.eventId] ?: reg.eventId}"></span>
+                    </td>
                     <td>
                         <span class="status" th:classappend="${reg.status == 'ACTIVE' ? 'status-active' : 'status-cancelled'}" th:text="${reg.status}"></span>
                     </td>
                     <td th:text="${reg.timestamps?.enrolledAt}"></td>
                     <td>
                         <form th:action="@{/registrations/{id}/cancel(id=${reg.id})}" method="post" style="display: inline;">
-                            <button type="submit" class="btn-cancel" th:disabled="${reg.status == 'CANCELLED'}">Cancel</button>
+                            <button type="submit" class="btn-cancel" th:disabled="${reg.status == 'CANCELLED'}">Cancelar</button>
                         </form>
                     </td>
                 </tr>

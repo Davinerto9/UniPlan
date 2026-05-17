@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Event Registrations - UniPlan</title>
+    <title>Registros del Evento - UniPlan</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
         .navbar { background-color: #0056b3; padding: 1rem; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -28,8 +28,8 @@
 <div class="navbar">
     <h1><a href="/home" style="margin:0; color: white;">UniPlan</a></h1>
     <div>
-        <span th:text="${#authentication.name}">User</span>
-        <a href="/logout">Logout</a>
+        <span th:text="${#authentication.name}">Usuario</span>
+        <a href="/logout">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -37,38 +37,38 @@
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-    <a href="/organizer/dashboard" class="btn" style="margin-bottom: 1rem; background-color: #6c757d;">&larr; Back to Dashboard</a>
+    <a href="/organizer/dashboard" class="btn" style="margin-bottom: 1rem; background-color: #6c757d;">&larr; Volver al Panel</a>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="margin: 0;">Registrations for Event</h2>
-        <a th:href="@{/event/{id}/export(id=${eventId})}" class="btn btn-success">Export Attendees to CSV</a>
+        <h2 style="margin: 0;">Registros del Evento</h2>
+        <a th:href="@{/event/{id}/export(id=${eventId})}" class="btn btn-success">Exportar Asistentes a CSV</a>
     </div>
 
     <table class="registrations-table">
         <thead>
             <tr>
-                <th>User Email</th>
-                <th>Status</th>
-                <th>Registered At</th>
-                <th>Actions</th>
+                <th>Correo del Estudiante</th>
+                <th>Estado</th>
+                <th>Registrado en</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="reg : ${registrations}">
-                <td th:text="${userEmails.get(reg.userId) != null ? userEmails.get(reg.userId) : reg.userId}">User Email</td>
+                <td th:text="${userEmails.get(reg.userId) != null ? userEmails.get(reg.userId) : reg.userId}">Correo del Usuario</td>
                 <td>
-                    <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Status</span>
+                    <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Estado</span>
                 </td>
-                <td th:text="${reg.createdAt}">Date</td>
+                <td th:text="${reg.createdAt}">Fecha</td>
                 <td>
                     <form th:if="${reg.status == 'ACTIVE'}" th:action="@{/event/{eventId}/registrations/{regId}/attend(eventId=${eventId}, regId=${reg.id})}" method="post">
-                        <button type="submit" class="btn btn-success">Mark Attendance</button>
+                        <button type="submit" class="btn btn-success">Marcar Asistencia</button>
                     </form>
                     <span th:if="${reg.status != 'ACTIVE'}" style="color: #999;">--</span>
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(registrations)}">
-                <td colspan="4" style="text-align: center; color: #666;">No registrations yet.</td>
+                <td colspan="4" style="text-align: center; color: #666;">Sin registros aún.</td>
             </tr>
         </tbody>
     </table>

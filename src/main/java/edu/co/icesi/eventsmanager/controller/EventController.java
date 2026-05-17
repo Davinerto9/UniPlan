@@ -106,7 +106,7 @@ public class EventController {
             });
 
             eventService.saveEvent(event);
-            redirectAttributes.addFlashAttribute("success", "Event saved successfully.");
+            redirectAttributes.addFlashAttribute("success", "Evento guardado exitosamente.");
             return "redirect:/home";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -129,7 +129,7 @@ public class EventController {
                                    RedirectAttributes redirectAttributes) {
         try {
             registrationService.registerToEvent(id, userDetails.getUser());
-            redirectAttributes.addFlashAttribute("success", "Successfully registered for event.");
+            redirectAttributes.addFlashAttribute("success", "Registrado al evento exitosamente.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -141,13 +141,13 @@ public class EventController {
     public String editEventForm(@PathVariable String id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model, RedirectAttributes redirectAttributes) {
         Optional<Event> eventOptional = eventService.getEventById(id);
         if (eventOptional.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Event not found.");
+            redirectAttributes.addFlashAttribute("error", "Evento no encontrado.");
             return "redirect:/home";
         }
         Event event = eventOptional.get();
         if (!userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))
                 && !userDetails.getUser().getId().equals(event.getOrganizerId())) {
-            redirectAttributes.addFlashAttribute("error", "You are not authorized to edit this event.");
+            redirectAttributes.addFlashAttribute("error", "No estás autorizado para editar este evento.");
             return "redirect:/home";
         }
         model.addAttribute("event", event);
@@ -185,7 +185,7 @@ public class EventController {
                                  RedirectAttributes redirectAttributes) {
         try {
             registrationService.markAttendance(regId, userDetails.getUser().getId());
-            redirectAttributes.addFlashAttribute("success", "Attendance marked successfully.");
+            redirectAttributes.addFlashAttribute("success", "Asistencia marcada exitosamente.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -238,17 +238,17 @@ public class EventController {
                               RedirectAttributes redirectAttributes) {
         Optional<Event> eventOptional = eventService.getEventById(id);
         if (eventOptional.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Event not found.");
+            redirectAttributes.addFlashAttribute("error", "Evento no encontrado.");
             return "redirect:/home";
         }
         Event event = eventOptional.get();
         if (!userDetails.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))
                 && !userDetails.getUser().getId().equals(event.getOrganizerId())) {
-            redirectAttributes.addFlashAttribute("error", "You are not authorized to edit this event.");
+            redirectAttributes.addFlashAttribute("error", "No estás autorizado para editar este evento.");
             return "redirect:/home";
         }
         eventService.deleteEvent(id);
-        redirectAttributes.addFlashAttribute("success", "Event deleted successfully.");
+        redirectAttributes.addFlashAttribute("success", "Evento eliminado exitosamente.");
         return "redirect:/home";
     }
 }
