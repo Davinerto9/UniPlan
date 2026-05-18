@@ -123,7 +123,7 @@ public class EventController {
     }
 
     @PostMapping("/event/{id}/register")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT')")
     public String registerForEvent(@PathVariable String id,
                                    @AuthenticationPrincipal CustomUserDetails userDetails,
                                    RedirectAttributes redirectAttributes) {
