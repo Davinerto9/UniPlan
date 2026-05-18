@@ -15,26 +15,32 @@
         .nav-buttons { display: flex; gap: 1rem; margin-bottom: 2rem; }
         .btn { padding: 0.75rem 1.5rem; background-color: #0056b3; color: white; text-decoration: none; border-radius: 4px; display: inline-block; }
         .btn:hover { background-color: #004494; }
+        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <h1><a href="/home" style="margin:0; color: white;">UniPlan Admin</a></h1>
+    <h1><a th:href="@{/home}" style="margin:0; color: white;">UniPlan Admin</a></h1>
     <div>
         <span th:text="${#authentication.name}">Usuario</span>
-        <a href="/logout">Cerrar Sesión</a>
+        <a th:href="@{/logout}">Cerrar Sesión</a>
     </div>
 </div>
 
 <div class="container">
     <h2>Panel de Administrador</h2>
 
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
     <div class="nav-buttons">
-        <a href="/register-organizer" class="btn">Registrar Organizador</a>
-        <a href="/admin/users/new" class="btn">Registrar Nuevo Usuario</a>
-        <a href="/admin/registrations" class="btn">Todos los Registros</a>
-        <a href="/admin/registrations/export" class="btn btn-secondary">Exportar CSV</a>
+        <a th:href="@{/register-organizer}" class="btn">Registrar Organizador</a>
+        <a th:href="@{/admin/users/new}" class="btn">Registrar Nuevo Usuario</a>
+        <a th:href="@{/admin/registrations}" class="btn">Todos los Registros</a>
+        <a th:href="@{/admin/registrations/export}" class="btn btn-secondary">Exportar CSV</a>
     </div>
 
     <div class="dashboard-grid">
@@ -61,12 +67,12 @@
             <div class="card">
                 <h4>Popularidad de Eventos</h4>
                 <p>Eventos más populares por cantidad de registros.</p>
-                <a href="/admin/reports/popularity" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">Ver Reporte</a>
+                <a th:href="@{/admin/reports/popularity}" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">Ver Reporte</a>
             </div>
             <div class="card">
                 <h4>Horas de Voluntariado</h4>
                 <p>Estudiantes con más horas de voluntariado.</p>
-                <a href="/admin/reports/volunteers" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">Ver Reporte</a>
+                <a th:href="@{/admin/reports/volunteers}" class="btn" style="margin-top:1rem; width:100%; box-sizing:border-box; text-align:center;">Ver Reporte</a>
             </div>
         </div>
     </div>

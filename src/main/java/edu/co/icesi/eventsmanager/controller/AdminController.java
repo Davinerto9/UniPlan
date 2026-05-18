@@ -58,7 +58,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/new")
-    public String newUserForm() {
+    public String newUserForm(Model model) {
         return "admin_user_form";
     }
 

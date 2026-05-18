@@ -115,9 +115,12 @@ public class EventController {
     }
 
     @GetMapping("/event/{id}")
-    public String eventDetails(@PathVariable String id, Model model) {
+    public String eventDetails(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Event> event = eventService.getEventById(id);
-        if (event.isEmpty()) return "redirect:/home";
+        if (event.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Evento no encontrado.");
+            return "redirect:/home";
+        }
         model.addAttribute("event", event.get());
         return "event_detail";
     }
