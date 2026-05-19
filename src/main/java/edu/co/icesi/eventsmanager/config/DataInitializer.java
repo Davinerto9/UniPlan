@@ -27,7 +27,9 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Checking for initial data...");
         // Initial Admin Creation
         String adminEmail = "admin@uniplan.edu.co";
-        if (userRepository.findByAuthEmail(adminEmail).isEmpty()) {
+        java.util.Optional<User> existingAdmin = userRepository.findByAuthEmail(adminEmail);
+        
+        if (existingAdmin.isEmpty()) {
             log.info("No admin found. Creating initial admin: {}", adminEmail);
             User admin = new User();
             User.Auth auth = new User.Auth();
@@ -51,7 +53,13 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(admin);
             log.info("Initial Admin created: {} / admin123", adminEmail);
         } else {
-            log.info("Admin already exists: {}", adminEmail);
+            User admin = existingAdmin.get();
+            // Ensure admin has correct ADMIN role format (String, not Object)
+            if (admin.getRoles() == null || admin.getRoles().isEmpty() || !(admin.getRoles().get(0) instanceof String) || !admin.getRoles().contains("ADMIN")) {
+                log.info("Updating admin roles to correct format...");
+                admin.setRoles(List.of("ADMIN"));
+                userRepository.save(admin);
+            }
         }
     }
 }
