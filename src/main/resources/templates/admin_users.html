@@ -71,6 +71,14 @@
                 </td>
                 <td th:text="${user.createdAt}">2024-01-01</td>
                 <td class="actions">
+                    <th:block th:if="${user.roles == null || !#lists.contains(user.roles, 'ORGANIZER')}">
+                        <form th:action="@{/admin/users/{userId}/assign-organizer(userId=${user.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: #28a745;" onclick="return confirm('¿Asignar rol de organizador a este usuario?')">Asignar Org</button>
+                        </form>
+                    </th:block>
+                    <th:block th:if="${user.roles != null && #lists.contains(user.roles, 'ORGANIZER')}">
+                        <span style="color: #28a745; font-size: 0.85rem;">✓ Es Organizador</span>
+                    </th:block>
                     <form th:action="@{/admin/users/{userId}/delete(userId=${user.id})}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')">Eliminar</button>
                     </form>
