@@ -55,7 +55,7 @@
 <div class="navbar">
     <h1><a th:href="@{/home}">UniPlan</a></h1>
     <div class="nav-links">
-        <a th:href="@{/my-registrations}" sec:authorize="hasRole('STUDENT')">Mis Registros</a>
+        <a th:href="@{/my-registrations}" sec:authorize="hasAnyRole('STUDENT', 'EMPLOYEE')">Mis Registros</a>
         <a th:href="@{/organizer/dashboard}" sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')">Panel del Organizador</a>
         <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')">Panel Admin</a>
         <span sec:authentication="name" style="font-weight: 600; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 1.5rem;">Usuario</span>
@@ -126,8 +126,14 @@
                     </div>
                 </div>
             </div>
-            <div class="event-footer">
-                <a th:href="@{/event/{id}(id=${event.id})}" class="btn btn-primary">Ver Detalles del Evento</a>
+            <div class="event-footer" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a th:href="@{/event/{id}(id=${event.id})}" class="btn btn-primary" style="flex: 1;">Ver Detalles</a>
+                <th:block sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')">
+                    <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn" style="background-color: #ffc107; color: black; padding: 0.7rem 1rem;">✎</a>
+                    <form th:action="@{/event/{id}/delete(id=${event.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn" style="background-color: #dc3545; color: white; padding: 0.7rem 1rem;" onclick="return confirm('¿Estás seguro de eliminar este evento?');">🗑</button>
+                    </form>
+                </th:block>
             </div>
         </div>
     </div>

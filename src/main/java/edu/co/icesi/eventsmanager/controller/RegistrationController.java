@@ -34,7 +34,7 @@ public class RegistrationController {
     private EventStatisticRepository eventStatisticRepository;
 
     @GetMapping("/my-registrations")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYEE')")
     public String myRegistrations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         List<EventRegistration> registrations = registrationRepository.findByUserId(userDetails.getUser().getId());
 
@@ -43,7 +43,7 @@ public class RegistrationController {
             .distinct()
             .map(id -> eventStatisticRepository.findById(id).orElse(null))
             .filter(stat -> stat != null)
-            .collect(Collectors.toMap(EventStatistic::getEventId, EventStatistic::getEventTitle));
+            .collect(Collectors.toMap(EventStatistic::getEventId, EventStatistic::getEventTitle, (existing, replacement) -> existing));
 
         model.addAttribute("registrations", registrations);
         model.addAttribute("eventTitles", eventTitles);
@@ -51,7 +51,7 @@ public class RegistrationController {
     }
 
     @PostMapping("/registrations/{id}/cancel")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYEE')")
     public String cancelRegistration(@PathVariable String id,
                                      @AuthenticationPrincipal CustomUserDetails userDetails,
                                      RedirectAttributes redirectAttributes) {

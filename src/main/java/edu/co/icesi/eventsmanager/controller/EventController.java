@@ -43,6 +43,9 @@ public class EventController {
                        @RequestParam(required = false) String state,
                        @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
+        if (userDetails != null) {
+            System.out.println("DEBUG: User " + userDetails.getUsername() + " logged in with authorities: " + userDetails.getAuthorities());
+        }
         List<Event> events = eventService.getAllEvents();
         java.time.LocalDate today = java.time.LocalDate.now();
         
@@ -132,7 +135,7 @@ public class EventController {
     }
 
     @PostMapping("/event/{id}/register")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYEE')")
     public String registerForEvent(@PathVariable String id,
                                    @AuthenticationPrincipal CustomUserDetails userDetails,
                                    RedirectAttributes redirectAttributes) {

@@ -16,15 +16,32 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final edu.co.icesi.eventsmanager.repository.OrganizerRepository organizerRepository;
+    private final edu.co.icesi.eventsmanager.repository.EventRepository eventRepository;
 
-    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder, 
+                           edu.co.icesi.eventsmanager.repository.OrganizerRepository organizerRepository,
+                           edu.co.icesi.eventsmanager.repository.EventRepository eventRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.organizerRepository = organizerRepository;
+        this.eventRepository = eventRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
         log.info("Checking for initial data...");
+        
+        // Inspect problematic student user
+        String studentEmail = "laura.hernandez@univcali.edu.co";
+        userRepository.findByAuthEmail(studentEmail).ifPresent(user -> {
+            edu.co.icesi.eventsmanager.security.CustomUserDetails details = new edu.co.icesi.eventsmanager.security.CustomUserDetails(user);
+            boolean isOrganizer = organizerRepository.findByUserId(user.getId()).isPresent();
+            long ownedEvents = eventRepository.findAll().stream().filter(e -> user.getId().equals(e.getOrganizerId())).count();
+            log.info("Inspecting user {}: Roles={}, Authorities={}, IsActive={}, RegisteredInOrganizerTable={}, OwnedEvents={}", 
+                studentEmail, user.getRoles(), details.getAuthorities(), user.getIsActive(), isOrganizer, ownedEvents);
+        });
+
         // Initial Admin Creation
         String adminEmail = "admin@uniplan.edu.co";
         java.util.Optional<User> existingAdmin = userRepository.findByAuthEmail(adminEmail);

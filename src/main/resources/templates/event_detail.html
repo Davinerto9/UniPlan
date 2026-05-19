@@ -61,17 +61,17 @@
     </div>
 
     <div class="btn-group">
-        <sec:authorize access="hasRole('STUDENT')">
+        <th:block sec:authorize="hasAnyRole('STUDENT', 'EMPLOYEE')">
             <form th:action="@{/event/{id}/register(id=${event.id})}" method="post" style="display: inline;">
                 <button type="submit" class="btn-register">Registrarse en el Evento</button>
             </form>
-        </sec:authorize>
-        <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
+        </th:block>
+        <th:block sec:authorize="hasAnyRole('ORGANIZER', 'ADMIN')">
             <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Editar Evento</a>
             <form th:action="@{/event/{id}/delete(id=${event.id})}" method="post" style="display: inline;">
                 <button type="submit" class="btn-delete" onclick="return confirm('Estás seguro?');">Eliminar Evento</button>
             </form>
-        </sec:authorize>
+        </th:block>
         <a th:href="@{/home}" style="padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">Volver a Eventos</a>
     </div>
 </div>
