@@ -173,11 +173,32 @@ public class EventController {
         List<EventRegistration> registrations = registrationService.getRegistrationsByEvent(id);
         
         Map<String, String> userEmails = new java.util.HashMap<>();
+        Map<String, String> userNames = new java.util.HashMap<>();
+        Map<String, String> userCodes = new java.util.HashMap<>();
+
         for (EventRegistration reg : registrations) {
             if (!userEmails.containsKey(reg.getUserId())) {
                 userRepository.findById(reg.getUserId()).ifPresent(user -> {
                     if (user.getAuth() != null) {
                         userEmails.put(reg.getUserId(), user.getAuth().getEmail());
+                    }
+                    if (user.getInstitutionRef() != null) {
+                        String instId = user.getInstitutionRef().getId();
+                        userCodes.put(reg.getUserId(), instId);
+                        
+                        String name = "N/A";
+                        if ("STUDENT".equals(user.getInstitutionRef().getType())) {
+                            Optional<edu.co.icesi.eventsmanager.entity.Student> s = studentRepository.findById(instId);
+                            if (s.isPresent()) {
+                                name = s.get().getFirstName() + " " + s.get().getLastName();
+                            }
+                        } else if ("EMPLOYEE".equals(user.getInstitutionRef().getType())) {
+                            Optional<edu.co.icesi.eventsmanager.entity.Employee> e = employeeRepository.findById(instId);
+                            if (e.isPresent()) {
+                                name = e.get().getFirstName() + " " + e.get().getLastName();
+                            }
+                        }
+                        userNames.put(reg.getUserId(), name);
                     }
                 });
             }
@@ -185,6 +206,8 @@ public class EventController {
         
         model.addAttribute("registrations", registrations);
         model.addAttribute("userEmails", userEmails);
+        model.addAttribute("userNames", userNames);
+        model.addAttribute("userCodes", userCodes);
         model.addAttribute("eventId", id);
         return "event_registrations";
     }

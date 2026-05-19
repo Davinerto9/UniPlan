@@ -47,7 +47,9 @@
     <table class="registrations-table">
         <thead>
             <tr>
-                <th>Correo del Estudiante</th>
+                <th>Nombre</th>
+                <th>Código</th>
+                <th>Correo Institucional</th>
                 <th>Estado</th>
                 <th>Registrado en</th>
                 <th>Acciones</th>
@@ -55,7 +57,9 @@
         </thead>
         <tbody>
             <tr th:each="reg : ${registrations}">
-                <td th:text="${userEmails.get(reg.userId) != null ? userEmails.get(reg.userId) : reg.userId}">Correo del Usuario</td>
+                <td th:text="${userNames.get(reg.userId)}">Nombre</td>
+                <td th:text="${userCodes.get(reg.userId)}">Código</td>
+                <td th:text="${userEmails.get(reg.userId)}">Correo</td>
                 <td>
                     <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Estado</span>
                 </td>
@@ -68,7 +72,7 @@
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(registrations)}">
-                <td colspan="4" style="text-align: center; color: #666;">Sin registros aún.</td>
+                <td colspan="6" style="text-align: center; color: #666;">Sin registros aún.</td>
             </tr>
         </tbody>
     </table>
