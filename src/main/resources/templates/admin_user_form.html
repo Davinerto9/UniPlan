@@ -35,14 +35,19 @@
             <input type="password" id="password" name="password" required minlength="8">
         </div>
         <div class="form-group">
-            <label for="role">Rol</label>
+            <label for="role">Rol Principal</label>
             <select id="role" name="role" required>
-                <option value="STUDENT">Estudiante</option>
-                <option value="EMPLOYEE">Empleado</option>
                 <option value="ADMIN">Administrador</option>
-                <option value="ORGANIZER">Organizador</option>
+                <option value="ORGANIZER">Organizador (Usará formulario específico después)</option>
             </select>
         </div>
+        <div class="form-group">
+            <label for="institutionType">Referencia Institucional (Para usuarios externos)</label>
+            <select id="institutionType" name="institutionType" required>
+                <option value="ADMIN">Administración del Sistema</option>
+            </select>
+        </div>
+        <p style="font-size: 0.8rem; color: #666;">Nota: Estudiantes y Empleados se registran automáticamente al entrar por primera vez o mediante el formulario de Organizador.</p>
         <button type="submit" class="btn">Guardar Usuario</button>
     </form>
 </div>

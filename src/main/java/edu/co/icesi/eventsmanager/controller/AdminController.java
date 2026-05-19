@@ -64,9 +64,13 @@ public class AdminController {
     }
 
     @PostMapping("/users/save")
-    public String saveUser(@RequestParam String email, @RequestParam String password, @RequestParam String role, RedirectAttributes redirectAttributes) {
+    public String saveUser(@RequestParam String email, 
+                           @RequestParam String password, 
+                           @RequestParam String role, 
+                           @RequestParam String institutionType,
+                           RedirectAttributes redirectAttributes) {
         try {
-            organizerService.registerUser(email, password, role, role); // Usamos role como institution type por defecto
+            organizerService.registerUser(email, password, role, institutionType);
             redirectAttributes.addFlashAttribute("success", "User registered successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -111,8 +115,8 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    @PostMapping("/users/{userId}/assign-organizer")
-    public String assignOrganizerRole(@PathVariable String userId, RedirectAttributes redirectAttributes) {
+    @PostMapping("/users/{userId}/assign-role")
+    public String assignRole(@PathVariable String userId, @RequestParam String role, RedirectAttributes redirectAttributes) {
         try {
             java.util.Optional<edu.co.icesi.eventsmanager.document.User> userOpt = userRepository.findById(userId);
             if (userOpt.isEmpty()) {
@@ -125,15 +129,38 @@ public class AdminController {
                 user.setRoles(new java.util.ArrayList<>());
             }
             
-            if (!user.getRoles().contains("ORGANIZER")) {
-                user.getRoles().add("ORGANIZER");
+            if (!user.getRoles().contains(role)) {
+                user.getRoles().add(role);
                 userRepository.save(user);
-                redirectAttributes.addFlashAttribute("success", "Rol de organizador asignado exitosamente.");
+                redirectAttributes.addFlashAttribute("success", "Rol " + role + " asignado exitosamente.");
             } else {
-                redirectAttributes.addFlashAttribute("error", "El usuario ya tiene el rol de organizador.");
+                redirectAttributes.addFlashAttribute("error", "El usuario ya tiene el rol " + role + ".");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al asignar rol: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/users/{userId}/remove-role")
+    public String removeRole(@PathVariable String userId, @RequestParam String role, RedirectAttributes redirectAttributes) {
+        try {
+            java.util.Optional<edu.co.icesi.eventsmanager.document.User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado.");
+                return "redirect:/admin/users";
+            }
+            
+            edu.co.icesi.eventsmanager.document.User user = userOpt.get();
+            if (user.getRoles() != null && user.getRoles().contains(role)) {
+                user.getRoles().remove(role);
+                userRepository.save(user);
+                redirectAttributes.addFlashAttribute("success", "Rol " + role + " removido exitosamente.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "El usuario no tiene el rol " + role + ".");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al remover rol: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }

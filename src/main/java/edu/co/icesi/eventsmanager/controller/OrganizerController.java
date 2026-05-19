@@ -31,7 +31,11 @@ public class OrganizerController {
 
     @GetMapping("/register-organizer")
     @PreAuthorize("hasRole('ADMIN')")
-    public String organizerRegistrationForm(Model model) {
+    public String organizerRegistrationForm(@RequestParam(required = false) String email, 
+                                           @RequestParam(required = false) String code, 
+                                           Model model) {
+        model.addAttribute("preEmail", email);
+        model.addAttribute("preCode", code);
         return "organizer_register";
     }
 

@@ -62,8 +62,26 @@
             <tr th:each="user : ${users}">
                 <td th:text="${user.auth != null ? user.auth.email : 'N/A'}">email@example.com</td>
                 <td>
+                    <div th:if="${user.roles != null && !#lists.isEmpty(user.roles)}" style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.5rem;">
+                        <th:block th:each="r : ${user.roles}">
+                            <!-- Institutional Roles: Read Only -->
+                            <span th:if="${r == 'STUDENT' || r == 'EMPLOYEE'}" 
+                                  style="padding: 0.1rem 0.4rem; font-size: 0.75rem; background-color: #e2e8f0; color: #4a5568; border-radius: 3px; font-weight: bold;" 
+                                  th:text="${r}"></span>
+                            
+                            <!-- Application Roles: Removable -->
+                            <form th:if="${r != 'STUDENT' && r != 'EMPLOYEE'}" 
+                                  th:action="@{/admin/users/{userId}/remove-role(userId=${user.id})}" method="post" style="display:inline;">
+                                <input type="hidden" name="role" th:value="${r}" />
+                                <button type="submit" style="padding: 0.1rem 0.4rem; font-size: 0.75rem; background-color: #ffc107; border: none; border-radius: 3px; cursor: pointer;" 
+                                        th:title="'Remover ' + ${r}" 
+                                        onclick="return confirm('¿Remover este rol?')">
+                                    <span th:text="${r}"></span> ✕
+                                </button>
+                            </form>
+                        </th:block>
+                    </div>
                     <span th:if="${user.roles == null || #lists.isEmpty(user.roles)}" style="color: #999;">Sin roles</span>
-                    <span th:if="${not #lists.isEmpty(user.roles)}" th:text="${#strings.listJoin(user.roles, ', ')}">ROLE1, ROLE2</span>
                 </td>
                 <td>
                     <span th:if="${user.isActive}" style="color: #28a745;">Activo</span>
@@ -71,16 +89,25 @@
                 </td>
                 <td th:text="${user.createdAt}">2024-01-01</td>
                 <td class="actions">
-                    <th:block th:if="${user.roles == null || !#lists.contains(user.roles, 'ORGANIZER')}">
-                        <form th:action="@{/admin/users/{userId}/assign-organizer(userId=${user.id})}" method="post" style="display:inline;">
-                            <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: #28a745;" onclick="return confirm('¿Asignar rol de organizador a este usuario?')">Asignar Org</button>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Promotion to Organizer Link -->
+                        <th:block th:if="${user.roles == null || !#lists.contains(user.roles, 'ORGANIZER')}">
+                            <a th:href="@{/register-organizer(email=${user.auth != null ? user.auth.email : ''}, code=${user.institutionRef != null ? user.institutionRef.id : ''})}" 
+                               class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: #28a745; text-align: center;">
+                                Promover a Organizador
+                            </a>
+                        </th:block>
+
+                        <!-- Quick Role Assignment (Only for ADMIN for now) -->
+                        <form th:if="${user.roles == null || !#lists.contains(user.roles, 'ADMIN')}" 
+                              th:action="@{/admin/users/{userId}/assign-role(userId=${user.id})}" method="post" style="display:flex; gap: 0.25rem;">
+                            <input type="hidden" name="role" value="ADMIN" />
+                            <button type="submit" class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background-color: #17a2b8; width: 100%;" onclick="return confirm('¿Asignar rol de ADMINISTRADOR?')">Hacer Admin</button>
                         </form>
-                    </th:block>
-                    <th:block th:if="${user.roles != null && #lists.contains(user.roles, 'ORGANIZER')}">
-                        <span style="color: #28a745; font-size: 0.85rem;">✓ Es Organizador</span>
-                    </th:block>
-                    <form th:action="@{/admin/users/{userId}/delete(userId=${user.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')">Eliminar</button>
+                    </div>
+                    
+                    <form th:action="@{/admin/users/{userId}/delete(userId=${user.id})}" method="post" style="display:inline; align-self: center; margin-left: 0.5rem;">
+                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">Eliminar</button>
                     </form>
                 </td>
             </tr>
