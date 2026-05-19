@@ -41,6 +41,7 @@ public class EventController {
                        @RequestParam(required = false) String startDate,
                        @RequestParam(required = false) String endDate,
                        @RequestParam(required = false) String state,
+                       @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
         List<Event> events = eventService.getAllEvents();
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -68,7 +69,12 @@ public class EventController {
             }).toList();
         }
 
+        String currentUserId = userDetails != null ? userDetails.getUser().getId() : null;
+        boolean isAdmin = userDetails != null && userDetails.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
         model.addAttribute("events", events);
+        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("isAdmin", isAdmin);
         return "home";
     }
 

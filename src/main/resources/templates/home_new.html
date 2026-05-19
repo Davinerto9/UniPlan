@@ -62,9 +62,9 @@
             <p><strong>Cupos disponibles:</strong> <span th:text="${event.capacity != null ? (event.capacity.max - event.capacity.current) : 0}"></span></p>
             <div class="card-actions">
                 <a th:href="@{/event/{id}(id=${event.id})}">Ver Detalles</a>
-                <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
+                <th:block th:if="${isAdmin || event.organizerId == currentUserId}">
                     <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Editar</a>
-                </sec:authorize>
+                </th:block>
             </div>
         </div>
     </div>

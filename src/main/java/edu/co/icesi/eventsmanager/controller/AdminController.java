@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -91,5 +92,22 @@ public class AdminController {
             writer.println(String.format("%s,%s,%s,%s,%s", 
                 reg.getId(), reg.getEventId(), reg.getUserId(), reg.getStatus(), reg.getCreatedAt()));
         }
+    }
+
+    @GetMapping("/users")
+    public String listUsers(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        return "admin_users";
+    }
+
+    @PostMapping("/users/{userId}/delete")
+    public String deleteUser(@PathVariable String userId, RedirectAttributes redirectAttributes) {
+        try {
+            userRepository.deleteById(userId);
+            redirectAttributes.addFlashAttribute("success", "Usuario eliminado exitosamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar usuario: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
     }
 }
