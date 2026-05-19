@@ -112,25 +112,8 @@ public class AdminController {
     }
 
     @PostMapping("/users/{userId}/assign-organizer")
-    public String assignOrganizerRole(@PathVariable String userId, 
-                                     @RequestParam String organizerType,
-                                     RedirectAttributes redirectAttributes) {
+    public String assignOrganizerRole(@PathVariable String userId, RedirectAttributes redirectAttributes) {
         try {
-            String[] allowedTypes = {"PROFESSOR", "LEADER", "WELLBEING"};
-            String upperType = organizerType.toUpperCase();
-            boolean isValidType = false;
-            for (String type : allowedTypes) {
-                if (type.equals(upperType)) {
-                    isValidType = true;
-                    break;
-                }
-            }
-            
-            if (!isValidType) {
-                redirectAttributes.addFlashAttribute("error", "Tipo de organizador inválido. Debe ser: PROFESSOR, LEADER o WELLBEING");
-                return "redirect:/admin/users";
-            }
-            
             java.util.Optional<edu.co.icesi.eventsmanager.document.User> userOpt = userRepository.findById(userId);
             if (userOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Usuario no encontrado.");
@@ -144,54 +127,13 @@ public class AdminController {
             
             if (!user.getRoles().contains("ORGANIZER")) {
                 user.getRoles().add("ORGANIZER");
-            }
-            
-            String roleWithType = "ORGANIZER_" + upperType;
-            if (!user.getRoles().contains(roleWithType)) {
-                user.getRoles().add(roleWithType);
                 userRepository.save(user);
-                redirectAttributes.addFlashAttribute("success", "Rol de organizador (" + upperType + ") asignado exitosamente.");
+                redirectAttributes.addFlashAttribute("success", "Rol de organizador asignado exitosamente.");
             } else {
-                redirectAttributes.addFlashAttribute("error", "El usuario ya tiene el rol de organizador tipo " + upperType);
+                redirectAttributes.addFlashAttribute("error", "El usuario ya tiene el rol de organizador.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al asignar rol: " + e.getMessage());
-        }
-        return "redirect:/admin/users";
-    }
-
-    @PostMapping("/users/{userId}/remove-organizer")
-    public String removeOrganizerRole(@PathVariable String userId, RedirectAttributes redirectAttributes) {
-        try {
-            java.util.Optional<edu.co.icesi.eventsmanager.document.User> userOpt = userRepository.findById(userId);
-            if (userOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado.");
-                return "redirect:/admin/users";
-            }
-            
-            edu.co.icesi.eventsmanager.document.User user = userOpt.get();
-            if (user.getRoles() == null || user.getRoles().isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "El usuario no tiene roles de organizador.");
-                return "redirect:/admin/users";
-            }
-            
-            java.util.List<String> rolesToRemove = new java.util.ArrayList<>();
-            for (String role : user.getRoles()) {
-                if (role.startsWith("ORGANIZER")) {
-                    rolesToRemove.add(role);
-                }
-            }
-            
-            if (rolesToRemove.isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "El usuario no tiene roles de organizador.");
-                return "redirect:/admin/users";
-            }
-            
-            user.getRoles().removeAll(rolesToRemove);
-            userRepository.save(user);
-            redirectAttributes.addFlashAttribute("success", "Roles de organizador removidos exitosamente.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al remover rol: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }
