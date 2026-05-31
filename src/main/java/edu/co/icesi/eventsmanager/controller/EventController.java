@@ -248,12 +248,12 @@ public class EventController {
                 String name = "N/A";
                 String email = user.getAuth() != null ? user.getAuth().getEmail() : "N/A";
                 
-                if ("STUDENT".equals(user.getInstitutionRef().getType())) {
+                if (user.getRoles() != null && user.getRoles().contains("STUDENT")) {
                     Optional<edu.co.icesi.eventsmanager.entity.Student> s = studentRepository.findById(instId);
                     if (s.isPresent()) {
                         name = s.get().getFirstName() + " " + s.get().getLastName();
                     }
-                } else if ("EMPLOYEE".equals(user.getInstitutionRef().getType())) {
+                } else if (user.getRoles() != null && user.getRoles().contains("EMPLOYEE")) {
                     Optional<edu.co.icesi.eventsmanager.entity.Employee> e = employeeRepository.findById(instId);
                     if (e.isPresent()) {
                         name = e.get().getFirstName() + " " + e.get().getLastName();

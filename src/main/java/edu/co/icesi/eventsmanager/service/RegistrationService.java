@@ -59,7 +59,7 @@ public class RegistrationService {
         boolean prerequisiteMet = true;
         Double latestSemester = 0.0;
 
-        if (user.getInstitutionRef() != null && "STUDENT".equals(user.getInstitutionRef().getType())) {
+        if (user.getRoles() != null && user.getRoles().contains("STUDENT")) {
             String studentId = user.getInstitutionRef().getId();
             academicValidationService.ensureStudentIsActive(studentId);
             latestSemester = academicValidationService.loadLatestSemester(studentId);
