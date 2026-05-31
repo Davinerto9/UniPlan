@@ -180,4 +180,9 @@ public class OrganizerService {
     public Optional<Organizer> findByUserId(String userId) {
         return organizerRepository.findByUserId(userId);
     }
+
+    public void deleteOrganizerByUserId(String userId) {
+        organizerRepository.findByUserId(userId)
+                .ifPresent(organizerRepository::delete);
+    }
 }

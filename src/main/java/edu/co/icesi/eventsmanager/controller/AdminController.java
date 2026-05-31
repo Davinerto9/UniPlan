@@ -155,6 +155,13 @@ public class AdminController {
             if (user.getRoles() != null && user.getRoles().contains(role)) {
                 user.getRoles().remove(role);
                 userRepository.save(user);
+
+                boolean hasOrganizerRole = user.getRoles().stream()
+                        .anyMatch(r -> r.equals("ORGANIZER") || r.startsWith("ORGANIZER_"));
+                if (!hasOrganizerRole) {
+                    organizerService.deleteOrganizerByUserId(userId);
+                }
+
                 redirectAttributes.addFlashAttribute("success", "Rol " + role + " removido exitosamente.");
             } else {
                 redirectAttributes.addFlashAttribute("error", "El usuario no tiene el rol " + role + ".");
