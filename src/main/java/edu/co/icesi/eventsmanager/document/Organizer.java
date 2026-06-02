@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Data
 public class Organizer {
-    private String userId;
+    //private String userId;
     private String organizerType; // PROFESSOR, LEADER, WELLBEING
     private TypeDetails typeDetails;
     private Boolean isActive;

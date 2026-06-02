@@ -115,7 +115,7 @@ public class OrganizerService {
         }
 
         Organizer organizer = new Organizer();
-        organizer.setUserId(savedUser.getId());
+        //organizer.setUserId(savedUser.getId());
         organizer.setOrganizerType(organizerType.toUpperCase());
         
         Organizer.TypeDetails typeDetails = new Organizer.TypeDetails();
