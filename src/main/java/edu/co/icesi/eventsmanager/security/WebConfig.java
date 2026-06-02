@@ -62,7 +62,9 @@ public class WebConfig {
                         .logoutSuccessUrl("/login?logout=true")
                         .permitAll()
                 )
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**")
+                )
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())
                 );
