@@ -6,6 +6,8 @@ import edu.co.icesi.eventsmanager.document.User;
 import edu.co.icesi.eventsmanager.repository.UserRepository;
 import edu.co.icesi.eventsmanager.repository.EventRegistrationRepository;
 import edu.co.icesi.eventsmanager.repository.EventRepository;
+import edu.co.icesi.eventsmanager.repository.EventStatisticRepository;
+import edu.co.icesi.eventsmanager.entity.EventStatistic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class RegistrationService {
@@ -32,6 +37,9 @@ public class RegistrationService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EventStatisticRepository eventStatisticRepository;
+
     @Transactional(transactionManager = "mongoTransactionManager")
     public void registerToEvent(String eventId, User user) throws Exception {
         if (user == null || user.getId() == null) {
@@ -50,8 +58,14 @@ public class RegistrationService {
             throw new Exception("No available spots.");
         }
 
-        if (registrationRepository.existsByEventIdAndUserIdAndStatus(eventId, user.getId(), "ACTIVE")) {
-            throw new Exception("You are already registered for this event.");
+        Optional<EventRegistration> existingReg = registrationRepository.findByEventIdAndUserId(eventId, user.getId());
+        if (existingReg.isPresent()) {
+            String status = existingReg.get().getStatus();
+            if ("ACTIVE".equalsIgnoreCase(status)) {
+                throw new Exception("You are already registered for this event.");
+            } else if ("ATTENDED".equalsIgnoreCase(status)) {
+                throw new Exception("You have already attended this event.");
+            }
         }
 
         // Specific Validations by Type
@@ -97,13 +111,17 @@ public class RegistrationService {
             throw new Exception("You have a schedule conflict with another active event.");
         }
 
-        EventRegistration registration = new EventRegistration();
+        EventRegistration registration = existingReg.orElse(new EventRegistration());
         registration.setEventId(eventId);
         registration.setUserId(user.getId());
         registration.setStatus("ACTIVE");
-        registration.setCreatedAt(Instant.now().toString());
+        
+        if (registration.getCreatedAt() == null) {
+            registration.setCreatedAt(Instant.now().toString());
+        }
 
-        EventRegistration.Timestamps timestamps = new EventRegistration.Timestamps();
+        EventRegistration.Timestamps timestamps = registration.getTimestamps() != null ? 
+                registration.getTimestamps() : new EventRegistration.Timestamps();
         timestamps.setEnrolledAt(Instant.now().toString());
         registration.setTimestamps(timestamps);
 
@@ -256,5 +274,34 @@ public class RegistrationService {
             }
         }
         return false;
+    }
+
+    public Map<String, Object> getRegistrationsWithTitles(String userId) {
+        List<EventRegistration> registrations = registrationRepository.findByUserId(userId);
+        if (registrations == null) {
+            registrations = List.of();
+        } else {
+            // Sort by createdAt descending
+            registrations = registrations.stream()
+                .sorted((a, b) -> {
+                    String dateA = a.getCreatedAt() != null ? a.getCreatedAt() : "";
+                    String dateB = b.getCreatedAt() != null ? b.getCreatedAt() : "";
+                    return dateB.compareTo(dateA); // Reverse order
+                })
+                .collect(Collectors.toList());
+        }
+        
+        final List<EventRegistration> finalRegs = registrations;
+        Map<String, String> eventTitles = finalRegs.stream()
+            .map(EventRegistration::getEventId)
+            .distinct()
+            .map(id -> eventStatisticRepository.findById(id).orElse(null))
+            .filter(stat -> stat != null)
+            .collect(Collectors.toMap(EventStatistic::getEventId, EventStatistic::getEventTitle, (existing, replacement) -> existing));
+
+        return Map.of(
+            "registrations", finalRegs,
+            "eventTitles", eventTitles
+        );
     }
 }

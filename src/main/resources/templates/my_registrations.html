@@ -61,7 +61,7 @@
                     <td>
                         <span class="status" th:classappend="${reg.status == 'ACTIVE' ? 'status-active' : 'status-cancelled'}" th:text="${reg.status}"></span>
                     </td>
-                    <td th:text="${reg.timestamps?.enrolledAt}"></td>
+                    <td th:text="${reg.createdAt != null && reg.createdAt.length() >= 16 ? reg.createdAt.substring(0,10) + ' ' + reg.createdAt.substring(11,16) : reg.createdAt}"></td>
                     <td>
                         <form th:action="@{/registrations/{id}/cancel(id=${reg.id})}" method="post" style="display: inline;">
                             <button type="submit" class="btn-cancel" th:disabled="${reg.status == 'CANCELLED'}">Cancelar</button>
