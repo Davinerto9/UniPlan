@@ -141,12 +141,34 @@ public class OrganizerService {
         return organizer;
     }
 
-    public User registerUser(String email, String password, String role, String institutionType) throws Exception {
+    public User registerUser(String code, String email, String password, String role, String institutionType) throws Exception {
+        if (code == null || code.isBlank()) {
+            throw new Exception("Institutional code is required.");
+        }
         if (email == null || email.isBlank()) {
             throw new Exception("Email is required.");
         }
         if (password == null || password.length() < 8) {
             throw new Exception("Password must have at least 8 characters.");
+        }
+
+        // Validate existence in institutional DB
+        if ("EMPLOYEE".equalsIgnoreCase(institutionType)) {
+            edu.co.icesi.eventsmanager.entity.Employee emp = employeeRepository.findById(code)
+                    .orElseThrow(() -> new Exception("Employee ID not found in institutional records."));
+            if (!emp.getEmail().equalsIgnoreCase(email)) {
+                throw new Exception("Email does not match institutional records for this Employee.");
+            }
+        } else if ("STUDENT".equalsIgnoreCase(institutionType)) {
+            edu.co.icesi.eventsmanager.entity.Student student = studentRepository.findById(code)
+                    .orElseThrow(() -> new Exception("Student ID not found in institutional records."));
+            if (!student.getEmail().equalsIgnoreCase(email)) {
+                throw new Exception("Email does not match institutional records for this Student.");
+            }
+        }
+
+        if (userRepository.findByInstitutionRefId(code).isPresent()) {
+            throw new Exception("User with this institutional ID is already registered.");
         }
 
         if (userRepository.findByAuthEmail(email).isPresent()) {
@@ -160,7 +182,7 @@ public class OrganizerService {
         user.setAuth(auth);
 
         User.InstitutionRef ref = new User.InstitutionRef();
-        ref.setId(null);
+        ref.setId(code);
         ref.setType(institutionType.toUpperCase());
         user.setInstitutionRef(ref);
 

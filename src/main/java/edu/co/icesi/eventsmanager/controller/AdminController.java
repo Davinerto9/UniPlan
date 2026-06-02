@@ -64,13 +64,14 @@ public class AdminController {
     }
 
     @PostMapping("/users/save")
-    public String saveUser(@RequestParam String email, 
+    public String saveUser(@RequestParam String institutionalCode,
+                           @RequestParam String email, 
                            @RequestParam String password, 
                            @RequestParam String role, 
                            @RequestParam String institutionType,
                            RedirectAttributes redirectAttributes) {
         try {
-            organizerService.registerUser(email, password, role, institutionType);
+            organizerService.registerUser(institutionalCode, email, password, role, institutionType);
             redirectAttributes.addFlashAttribute("success", "User registered successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
