@@ -6,10 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Map;
 
 @Data
-@Document(collection = "Organizers")
 public class Organizer {
-    @Id
-    private String id;
     private String userId;
     private String organizerType; // PROFESSOR, LEADER, WELLBEING
     private TypeDetails typeDetails;

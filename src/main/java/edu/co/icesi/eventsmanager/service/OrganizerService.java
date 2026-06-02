@@ -2,7 +2,6 @@ package edu.co.icesi.eventsmanager.service;
 
 import edu.co.icesi.eventsmanager.document.User;
 import edu.co.icesi.eventsmanager.document.Organizer;
-import edu.co.icesi.eventsmanager.repository.OrganizerRepository;
 import edu.co.icesi.eventsmanager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,9 +19,6 @@ public class OrganizerService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private OrganizerRepository organizerRepository;
 
     @Autowired
     private edu.co.icesi.eventsmanager.repository.EmployeeRepository employeeRepository;
@@ -114,7 +110,7 @@ public class OrganizerService {
             savedUser = userRepository.save(user);
         }
 
-        if (organizerRepository.findByUserId(savedUser.getId()).isPresent()) {
+        if (savedUser.getOrganizer() != null) {
             throw new Exception("This user is already registered as an organizer.");
         }
 
@@ -138,7 +134,11 @@ public class OrganizerService {
         
         organizer.setTypeDetails(typeDetails);
         organizer.setIsActive(true);
-        return organizerRepository.save(organizer);
+        
+        savedUser.setOrganizer(organizer);
+        userRepository.save(savedUser);
+        
+        return organizer;
     }
 
     public User registerUser(String email, String password, String role, String institutionType) throws Exception {
@@ -178,11 +178,13 @@ public class OrganizerService {
     }
 
     public Optional<Organizer> findByUserId(String userId) {
-        return organizerRepository.findByUserId(userId);
+        return userRepository.findById(userId).map(User::getOrganizer);
     }
 
     public void deleteOrganizerByUserId(String userId) {
-        organizerRepository.findByUserId(userId)
-                .ifPresent(organizerRepository::delete);
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setOrganizer(null);
+            userRepository.save(user);
+        });
     }
 }

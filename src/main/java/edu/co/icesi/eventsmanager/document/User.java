@@ -16,6 +16,7 @@ public class User {
     private Boolean isActive;
     private String createdAt;
     private AppData appData;
+    private Organizer organizer;
 
     @Data
     public static class Auth {
