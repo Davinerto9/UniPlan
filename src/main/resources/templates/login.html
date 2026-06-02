@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Iniciar Sesión - UniPlan</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" th:href="@{/styles.css}">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .login-container { background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
@@ -45,7 +45,7 @@
     </form>
     
     <div class="register-link">
-        <p>¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
+        <p>¿No tienes cuenta? <a th:href="@{/register}">Regístrate aquí</a></p>
     </div>
 </div>
 

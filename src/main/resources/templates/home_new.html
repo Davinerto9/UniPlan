@@ -31,12 +31,12 @@
     <div class="user-menu">
         <span th:text="${#authentication.name}">Usuario</span>
         <sec:authorize access="hasRole('STUDENT')">
-            <a href="/my-registrations">Mis Registros</a>
+            <a th:href="@{/my-registrations}">Mis Registros</a>
         </sec:authorize>
         <sec:authorize access="hasRole('ADMIN')">
-            <a href="/admin/dashboard">Admin</a>
+            <a th:href="@{/admin/dashboard}">Admin</a>
         </sec:authorize>
-        <a href="/logout">Cerrar Sesi</a>
+        <a th:href="@{/logout}">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -45,7 +45,7 @@
 
     <div class="header-actions">
         <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
-            <a href="/events/new" class="btn">Crear Evento</a>
+            <a th:href="@{/events/new}" class="btn">Crear Evento</a>
         </sec:authorize>
     </div>
     
@@ -62,9 +62,9 @@
             <p><strong>Cupos disponibles:</strong> <span th:text="${event.capacity != null ? (event.capacity.max - event.capacity.current) : 0}"></span></p>
             <div class="card-actions">
                 <a th:href="@{/event/{id}(id=${event.id})}">Ver Detalles</a>
-                <sec:authorize access="hasAnyRole('ORGANIZER', 'ADMIN')">
+                <th:block th:if="${isAdmin || event.organizerId == currentUserId}">
                     <a th:href="@{/event/{id}/edit(id=${event.id})}" class="btn-edit">Editar</a>
-                </sec:authorize>
+                </th:block>
             </div>
         </div>
     </div>

@@ -26,10 +26,10 @@
 <body>
 
 <div class="navbar">
-    <h1><a href="/home" style="margin:0; color: white;">UniPlan</a></h1>
+    <h1><a th:href="@{/home}" style="margin:0; color: white;">UniPlan</a></h1>
     <div>
         <span th:text="${#authentication.name}">Usuario</span>
-        <a href="/logout">Cerrar Sesión</a>
+        <a th:href="@{/logout}">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -37,7 +37,7 @@
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-    <a href="/organizer/dashboard" class="btn" style="margin-bottom: 1rem; background-color: #6c757d;">&larr; Volver al Panel</a>
+    <a th:href="@{/organizer/dashboard}" class="btn" style="margin-bottom: 1rem; background-color: #6c757d;">&larr; Volver al Panel</a>
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2 style="margin: 0;">Registros del Evento</h2>
@@ -47,7 +47,9 @@
     <table class="registrations-table">
         <thead>
             <tr>
-                <th>Correo del Estudiante</th>
+                <th>Nombre</th>
+                <th>Código</th>
+                <th>Correo Institucional</th>
                 <th>Estado</th>
                 <th>Registrado en</th>
                 <th>Acciones</th>
@@ -55,7 +57,9 @@
         </thead>
         <tbody>
             <tr th:each="reg : ${registrations}">
-                <td th:text="${userEmails.get(reg.userId) != null ? userEmails.get(reg.userId) : reg.userId}">Correo del Usuario</td>
+                <td th:text="${userNames.get(reg.userId)}">Nombre</td>
+                <td th:text="${userCodes.get(reg.userId)}">Código</td>
+                <td th:text="${userEmails.get(reg.userId)}">Correo</td>
                 <td>
                     <span th:class="'status-badge status-' + ${reg.status.toLowerCase()}" th:text="${reg.status}">Estado</span>
                 </td>
@@ -68,7 +72,7 @@
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(registrations)}">
-                <td colspan="4" style="text-align: center; color: #666;">Sin registros aún.</td>
+                <td colspan="6" style="text-align: center; color: #666;">Sin registros aún.</td>
             </tr>
         </tbody>
     </table>

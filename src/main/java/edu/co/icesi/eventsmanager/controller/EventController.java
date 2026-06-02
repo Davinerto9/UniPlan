@@ -41,7 +41,11 @@ public class EventController {
                        @RequestParam(required = false) String startDate,
                        @RequestParam(required = false) String endDate,
                        @RequestParam(required = false) String state,
+                       @AuthenticationPrincipal CustomUserDetails userDetails,
                        Model model) {
+        if (userDetails != null) {
+            System.out.println("DEBUG: User " + userDetails.getUsername() + " logged in with authorities: " + userDetails.getAuthorities());
+        }
         List<Event> events = eventService.getAllEvents();
         java.time.LocalDate today = java.time.LocalDate.now();
         
@@ -68,7 +72,12 @@ public class EventController {
             }).toList();
         }
 
+        String currentUserId = userDetails != null ? userDetails.getUser().getId() : null;
+        boolean isAdmin = userDetails != null && userDetails.getAuthorities().stream()
+            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
         model.addAttribute("events", events);
+        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("isAdmin", isAdmin);
         return "home";
     }
 
@@ -115,15 +124,18 @@ public class EventController {
     }
 
     @GetMapping("/event/{id}")
-    public String eventDetails(@PathVariable String id, Model model) {
+    public String eventDetails(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Event> event = eventService.getEventById(id);
-        if (event.isEmpty()) return "redirect:/home";
+        if (event.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Evento no encontrado.");
+            return "redirect:/home";
+        }
         model.addAttribute("event", event.get());
         return "event_detail";
     }
 
     @PostMapping("/event/{id}/register")
-    @PreAuthorize("hasAnyRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYEE')")
     public String registerForEvent(@PathVariable String id,
                                    @AuthenticationPrincipal CustomUserDetails userDetails,
                                    RedirectAttributes redirectAttributes) {
@@ -161,11 +173,32 @@ public class EventController {
         List<EventRegistration> registrations = registrationService.getRegistrationsByEvent(id);
         
         Map<String, String> userEmails = new java.util.HashMap<>();
+        Map<String, String> userNames = new java.util.HashMap<>();
+        Map<String, String> userCodes = new java.util.HashMap<>();
+
         for (EventRegistration reg : registrations) {
             if (!userEmails.containsKey(reg.getUserId())) {
                 userRepository.findById(reg.getUserId()).ifPresent(user -> {
                     if (user.getAuth() != null) {
                         userEmails.put(reg.getUserId(), user.getAuth().getEmail());
+                    }
+                    if (user.getInstitutionRef() != null) {
+                        String instId = user.getInstitutionRef().getId();
+                        userCodes.put(reg.getUserId(), instId);
+                        
+                        String name = "N/A";
+                        if ("STUDENT".equals(user.getInstitutionRef().getType())) {
+                            Optional<edu.co.icesi.eventsmanager.entity.Student> s = studentRepository.findById(instId);
+                            if (s.isPresent()) {
+                                name = s.get().getFirstName() + " " + s.get().getLastName();
+                            }
+                        } else if ("EMPLOYEE".equals(user.getInstitutionRef().getType())) {
+                            Optional<edu.co.icesi.eventsmanager.entity.Employee> e = employeeRepository.findById(instId);
+                            if (e.isPresent()) {
+                                name = e.get().getFirstName() + " " + e.get().getLastName();
+                            }
+                        }
+                        userNames.put(reg.getUserId(), name);
                     }
                 });
             }
@@ -173,6 +206,8 @@ public class EventController {
         
         model.addAttribute("registrations", registrations);
         model.addAttribute("userEmails", userEmails);
+        model.addAttribute("userNames", userNames);
+        model.addAttribute("userCodes", userCodes);
         model.addAttribute("eventId", id);
         return "event_registrations";
     }
@@ -213,12 +248,12 @@ public class EventController {
                 String name = "N/A";
                 String email = user.getAuth() != null ? user.getAuth().getEmail() : "N/A";
                 
-                if ("STUDENT".equals(user.getInstitutionRef().getType())) {
+                if (user.getRoles() != null && user.getRoles().contains("STUDENT")) {
                     Optional<edu.co.icesi.eventsmanager.entity.Student> s = studentRepository.findById(instId);
                     if (s.isPresent()) {
                         name = s.get().getFirstName() + " " + s.get().getLastName();
                     }
-                } else if ("EMPLOYEE".equals(user.getInstitutionRef().getType())) {
+                } else if (user.getRoles() != null && user.getRoles().contains("EMPLOYEE")) {
                     Optional<edu.co.icesi.eventsmanager.entity.Employee> e = employeeRepository.findById(instId);
                     if (e.isPresent()) {
                         name = e.get().getFirstName() + " " + e.get().getLastName();

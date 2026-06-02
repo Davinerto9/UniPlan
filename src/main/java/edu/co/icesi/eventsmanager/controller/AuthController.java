@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(Model model) {
         return "register";
     }
 

@@ -25,10 +25,10 @@
 <body>
 
 <div class="navbar">
-    <h1><a href="/home" style="margin:0; color: white;">UniPlan Organizador</a></h1>
+    <h1><a th:href="@{/home}" style="margin:0; color: white;">UniPlan Organizador</a></h1>
     <div>
         <span th:text="${#authentication.name}">Usuario</span>
-        <a href="/logout">Cerrar Sesi</a>
+        <a th:href="@{/logout}">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -38,7 +38,7 @@
 
     <div class="dashboard-header">
         <h2>Mis Eventos Gestionados</h2>
-        <a href="/events/new" class="btn">Crear Nuevo Evento</a>
+        <a th:href="@{/events/new}" class="btn">Crear Nuevo Evento</a>
     </div>
 
     <table class="events-table">

@@ -22,9 +22,16 @@ public class RegistrationController {
     private RegistrationService registrationService;
 
     @GetMapping("/my-registrations")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYEE')")
     public String myRegistrations(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        Map<String, Object> data = registrationService.getRegistrationsWithTitles(userDetails.getUser().getId());
+        List<EventRegistration> registrations = registrationRepository.findByUserId(userDetails.getUser().getId());
+
+        Map<String, String> eventTitles = registrations.stream()
+            .map(EventRegistration::getEventId)
+            .distinct()
+            .map(id -> eventStatisticRepository.findById(id).orElse(null))
+            .filter(stat -> stat != null)
+            .collect(Collectors.toMap(EventStatistic::getEventId, EventStatistic::getEventTitle, (existing, replacement) -> existing));
 
         model.addAttribute("registrations", data.get("registrations"));
         model.addAttribute("eventTitles", data.get("eventTitles"));
@@ -32,7 +39,7 @@ public class RegistrationController {
     }
 
     @PostMapping("/registrations/{id}/cancel")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'EMPLOYEE')")
     public String cancelRegistration(@PathVariable String id,
                                      @AuthenticationPrincipal CustomUserDetails userDetails,
                                      RedirectAttributes redirectAttributes) {

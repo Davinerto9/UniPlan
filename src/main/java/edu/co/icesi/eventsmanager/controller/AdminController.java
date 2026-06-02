@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,14 +59,18 @@ public class AdminController {
     }
 
     @GetMapping("/users/new")
-    public String newUserForm() {
+    public String newUserForm(Model model) {
         return "admin_user_form";
     }
 
     @PostMapping("/users/save")
-    public String saveUser(@RequestParam String email, @RequestParam String password, @RequestParam String role, RedirectAttributes redirectAttributes) {
+    public String saveUser(@RequestParam String email, 
+                           @RequestParam String password, 
+                           @RequestParam String role, 
+                           @RequestParam String institutionType,
+                           RedirectAttributes redirectAttributes) {
         try {
-            organizerService.registerUser(email, password, role, role); // Usamos role como institution type por defecto
+            organizerService.registerUser(email, password, role, institutionType);
             redirectAttributes.addFlashAttribute("success", "User registered successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -91,5 +96,79 @@ public class AdminController {
             writer.println(String.format("%s,%s,%s,%s,%s", 
                 reg.getId(), reg.getEventId(), reg.getUserId(), reg.getStatus(), reg.getCreatedAt()));
         }
+    }
+
+    @GetMapping("/users")
+    public String listUsers(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        return "admin_users";
+    }
+
+    @PostMapping("/users/{userId}/delete")
+    public String deleteUser(@PathVariable String userId, RedirectAttributes redirectAttributes) {
+        try {
+            userRepository.deleteById(userId);
+            redirectAttributes.addFlashAttribute("success", "Usuario eliminado exitosamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar usuario: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/users/{userId}/assign-role")
+    public String assignRole(@PathVariable String userId, @RequestParam String role, RedirectAttributes redirectAttributes) {
+        try {
+            java.util.Optional<edu.co.icesi.eventsmanager.document.User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado.");
+                return "redirect:/admin/users";
+            }
+            
+            edu.co.icesi.eventsmanager.document.User user = userOpt.get();
+            if (user.getRoles() == null) {
+                user.setRoles(new java.util.ArrayList<>());
+            }
+            
+            if (!user.getRoles().contains(role)) {
+                user.getRoles().add(role);
+                userRepository.save(user);
+                redirectAttributes.addFlashAttribute("success", "Rol " + role + " asignado exitosamente.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "El usuario ya tiene el rol " + role + ".");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al asignar rol: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/users/{userId}/remove-role")
+    public String removeRole(@PathVariable String userId, @RequestParam String role, RedirectAttributes redirectAttributes) {
+        try {
+            java.util.Optional<edu.co.icesi.eventsmanager.document.User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado.");
+                return "redirect:/admin/users";
+            }
+            
+            edu.co.icesi.eventsmanager.document.User user = userOpt.get();
+            if (user.getRoles() != null && user.getRoles().contains(role)) {
+                user.getRoles().remove(role);
+                userRepository.save(user);
+
+                boolean hasOrganizerRole = user.getRoles().stream()
+                        .anyMatch(r -> r.equals("ORGANIZER") || r.startsWith("ORGANIZER_"));
+                if (!hasOrganizerRole) {
+                    organizerService.deleteOrganizerByUserId(userId);
+                }
+
+                redirectAttributes.addFlashAttribute("success", "Rol " + role + " removido exitosamente.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "El usuario no tiene el rol " + role + ".");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al remover rol: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
     }
 }

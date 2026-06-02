@@ -76,10 +76,10 @@
 <body>
 
 <div class="navbar">
-    <h1><a href="/home" style="margin:0; color: white;">UniPlan</a></h1>
+    <h1><a th:href="@{/home}" style="margin:0; color: white;">UniPlan</a></h1>
     <div>
         <span th:text="${#authentication.name}">Usuario</span>
-        <a href="/logout">Cerrar Sesión</a>
+        <a th:href="@{/logout}">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -190,7 +190,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Guardar Evento</button>
-            <a href="/home" class="btn btn-secondary">Cancelar</a>
+            <a th:href="@{/home}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>
